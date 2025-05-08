@@ -1,8 +1,6 @@
 from micropython import const
 import ustruct
 import utime
-from machine import Timer
-import time
 
 _IO_TIMEOUT = 1000
 _SYSRANGE_START = const(0x00)
@@ -636,11 +634,10 @@ class VL53L0X:
         return True
 
     def perform_single_ref_calibration(self, vhv_init_byte):
-        chrono = Timer.Chrono()
         self._register(SYSRANGE_START, 0x01|vhv_init_byte)
-        chrono.start()
+        chrono_start = utime.ticks_ms()
         while self._register((RESULT_INTERRUPT_STATUS & 0x07) == 0):
-            time_elapsed = chrono.read_ms()
+            time_elapsed = utime.ticks_ms() - chrono_start
             if time_elapsed > _IO_TIMEOUT:
                 return False
         self._register(SYSTEM_INTERRUPT_CLEAR, 0x01)
