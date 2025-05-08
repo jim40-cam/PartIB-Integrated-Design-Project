@@ -12,7 +12,8 @@ class tcs3472:
         self._bus = bus
         self._i2c_address = address
         
-        self._bus.start()
+        if type(bus) == "<class 'SoftI2C'>":
+            self._bus.start()
         
         self._bus.writeto(self._i2c_address, b'\x80\x03')
         self._bus.writeto(self._i2c_address, b'\x81\x2b')
