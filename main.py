@@ -5,6 +5,7 @@ from test_motor import test_motor3
 from test_linear_actuator import test_actuator1
 from test_tcs3472 import test_tcs3472
 from test_vl53l0x import test_vl53l0x
+from test_mfrc522 import test_mfrc522
 
 print("Welcome to main.py!")
 
@@ -16,5 +17,6 @@ print("Welcome to main.py!")
 # test_tcs3472()
 # test_actuator1()
 # test_vl53l0x()
+# test_mfrc522()
 
 print("main.py Done!")

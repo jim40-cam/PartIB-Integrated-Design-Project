@@ -9,14 +9,14 @@ class BasicMFRC522:
         MFRC522 (module): The MFRC522 module used for communication with the RFID reader.
         KEY (list): The default authentication key used for reading and writing data.
     """
-    def __init__(self, KEY=[0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]):
+    def __init__(self, i2c_bus, KEY=[0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]):
         """
         Initializes a BasicMFRC522 instance.
 
         Args:
             KEY (list): The authentication key used for reading and writing data.
         """
-        self.MFRC522 = MFRC522()  # Create an instance of the MFRC522 class
+        self.MFRC522 = MFRC522(i2c_bus)  # Create an instance of the MFRC522 class
         self.KEY = KEY  # Set the authentication key
 
     def read_sector(self, trailer_block):
@@ -102,12 +102,12 @@ class BasicMFRC522:
         # Send request to RFID tag
         (status, TagType) = self.MFRC522.Request(self.MFRC522.PICC_REQIDL)
         if status != self.MFRC522.MI_OK:
-            return None, None
+            raise ValueError(f"Request failed, status={status}")
 
         # Anticollision, return UID if successful
         (status, uid) = self.MFRC522.Anticoll()
         if status != self.MFRC522.MI_OK:
-            return None, None
+            raise ValueError(f"AntiColl failed, status={status}")
 
         # Convert UID to integer and store as the tag ID
         id = self._uid_to_num(uid)
@@ -140,12 +140,11 @@ class BasicMFRC522:
             # Return the tag ID and the read data
             return id, text_read
 
-        except:
+        except Exception as e:
             # Stop cryptographic communication with the tag in case of exception
             self.MFRC522.StopCrypto1()
-
-            # Return None, None if an exception occurs
-            return None, None
+            print("Generic read_no_block() exception: ", e)
+            raise
         
     def write_sector(self, text, trailer_block):
         """

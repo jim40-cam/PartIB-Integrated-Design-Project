@@ -1,10 +1,8 @@
-import RPi.GPIO as GPIO
-import spidev
-import logging
-import time
-
+from utime import sleep
 
 class MFRC522:
+    MFRC522_addr = 0x28  # =40
+
     MAX_LEN = 16
 
     # Proximity Coupling Device
@@ -104,51 +102,25 @@ class MFRC522:
     Reserved32 = 0x3D
     Reserved33 = 0x3E
     Reserved34 = 0x3F
-
     serNum = []
 
-    def __init__(self, bus=0, device=0, spd=1000000, pin_mode=10, pin_rst=-1, debugLevel='WARNING'):
+    def __init__(self, i2c_bus=0, i2c_address=MFRC522_addr, debugLevel='WARNING'):
         """
         Initializes the MFRC522 RFID reader.
 
         Args:
         - bus (int): the SPI bus number (default 0).
-        - device (int): the SPI device number (default 0).
-        - spd (int): the SPI bus speed (default 1000000).
-        - pin_mode (int): the GPIO pin numbering mode (default 10).
-        - pin_rst (int): the GPIO pin number for reset (default -1, which sets the pin based on pin_mode).
-        - debugLevel (str): the logging debug level (default 'WARNING').
         """
-        # Initialize SPI communication
-        self.spi = spidev.SpiDev()
-        self.spi.open(bus, device)
-        self.spi.max_speed_hz = spd
+        # Store I2C
+        self.i2c_bus = i2c_bus
+        self.i2c_address = i2c_address
+        if type(i2c_bus) == "<class 'SoftI2C'>":
+            self.i2c_bus.start()
 
-        # Initialize logger for debugging
-        self.logger = logging.getLogger('mfrc522Logger')
-        self.logger.addHandler(logging.StreamHandler())
-        level = logging.getLevelName(debugLevel)
-        self.logger.setLevel(level)
-
-        # Set GPIO pin numbering mode if not already set
-        gpioMode = GPIO.getmode()
-
-        if gpioMode is None:
-            GPIO.setmode(pin_mode)
-        else:
-            pin_mode = gpioMode
-
-        # Set reset pin based on pin_mode if not specified
-        if pin_rst == -1:
-            if pin_mode == 11:
-                pin_rst = 25
-            else:
-                pin_rst = 22
-
+        # TODO do we need this??
         self.StopAuth = self.StopCrypto1
-        # Set up reset pin and initialize MFRC522 RFID reader
-        GPIO.setup(pin_rst, GPIO.OUT)
-        GPIO.output(pin_rst, 1)
+        
+        # Initialize MFRC522 RFID reader
         self.Init()
 
     def Reset(self):
@@ -163,22 +135,22 @@ class MFRC522:
 
     def WriteReg(self, addr, val):
         """
-        Write a value to a register of the MFRC522 chip using SPI communication.
+        Write a value to a register of the MFRC522 chip using I2C communication.
 
-        This method sends a write command to the MFRC522 chip using the SPI interface, specifying the
+        This method sends a write command to the MFRC522 chip using the I2C interface, specifying the
         register address and the value to be written.
 
         Args:
             :param: (int): the address of the register to write to, in the range 0x00-0xFF.
             val (int): the value to write to the register, in the range 0x00-0xFF.
         """
-        val = self.spi.xfer2([(addr << 1) & 0x7E, val])
+        self.i2c_bus.writeto(self.i2c_address, bytearray([addr, val]))
 
     def ReadReg(self, addr):
         """
-        Read the value of a register of the MFRC522 chip using SPI communication.
+        Read the value of a register of the MFRC522 chip using I2C communication.
 
-        This method sends a read command to the MFRC522 chip using the SPI interface, specifying the
+        This method sends a read command to the MFRC522 chip using the I2C interface, specifying the
         register address.
 
         Args:
@@ -187,8 +159,10 @@ class MFRC522:
         Returns:
             The value read from the register.
         """
-        val = self.spi.xfer2([((addr << 1) & 0x7E) | 0x80, 0])
-        return val[1]
+
+        self.i2c_bus.writeto(self.i2c_address, bytearray([addr]))
+        val = self.i2c_bus.readfrom(self.i2c_address, 1)
+        return int.from_bytes(val)
 
     def Close(self):
         """
@@ -198,8 +172,9 @@ class MFRC522:
         system resources associated with it. It also calls the `GPIO.cleanup()` function to release
         any GPIO pins that were used to control the chip.
         """
-        self.spi.close()
-        GPIO.cleanup()
+        #self.spi.close()
+        #GPIO.cleanup()
+        pass
 
     def SetBitMask(self, reg, mask):
         """
@@ -306,7 +281,7 @@ class MFRC522:
         # Wait for command execution (timeout)
         i = 2000
         while True:
-            time.sleep(0.35)
+            sleep(0.35)
             n = self.ReadReg(self.CommIrqReg)
             i -= 1
             # Break if interrupt request received or timeout
@@ -374,6 +349,7 @@ class MFRC522:
 
         # If the status is not MI_OK or the back bits are not 0x10, set status to MI_ERR
         if ((status != self.MI_OK) | (backBits != 0x10)):
+            #print(f"Request() Error, status={status}, backBits={backBits:02x}")
             status = self.MI_ERR
 
         # Return a tuple containing the status, back bits and tag type
@@ -492,7 +468,7 @@ class MFRC522:
         # Check if the response is successful and has the expected length
         if (status == self.MI_OK) and (backLen == 0x18):
             # Log the size of the response and return the first byte of the response
-            self.logger.debug("Size: " + str(backData[0]))
+            #self.logger.debug("Size: " + str(backData[0]))
             return backData[0]
         else:
             # Return 0 if the response is not successful or has an unexpected length
@@ -532,9 +508,9 @@ class MFRC522:
         
         # Check if an error occurred
         if not (status == self.MI_OK):
-            self.logger.error("AUTH ERROR!!")
+            raise ValueError(f"AUTH ERROR status={status}")
         if not (self.ReadReg(self.Status2Reg) & 0x08) != 0:
-            self.logger.error("AUTH ERROR(status2reg & 0x08) != 0")
+            raise ValueError(f"AUTH ERROR(status2reg={self.Status2Reg} & 0x08) != 0")
 
         # Return the status
         return status
@@ -568,17 +544,17 @@ class MFRC522:
         # send the command and block address array to the RFID card and receive response
         (status, backData, backLen) = self.MFRC522_ToCard(
             self.PCD_TRANSCEIVE, recvData)
-        # if response status is not OK, print error message
+        # if response status is not OK, raise error
         if not (status == self.MI_OK):
-            self.logger.error("Error while reading!")
+            raise ValueError(f"Error while reading, status={status}")
 
         # if response data has length 16, print debug message and return data
         if len(backData) == 16:
-            self.logger.debug("Sector " + str(blockAddr) + " " + str(backData))
+            # print("Sector " + str(blockAddr) + " " + str(backData))
             return backData
         # if response data length is not 16, return None
         else:
-            return None
+            raise ValueError(f"Invalid length {len(BackData)}")
 
     def WriteTag(self, blockAddr, writeData):
         """
@@ -610,8 +586,8 @@ class MFRC522:
         if not (status == self.MI_OK) or not (backLen == 4) or not ((backData[0] & 0x0F) == 0x0A):
             status = self.MI_ERR
 
-        self.logger.debug("%s backdata &0x0F == 0x0A %s" %
-                          (backLen, backData[0] & 0x0F))
+        #self.logger.debug("%s backdata &0x0F == 0x0A %s" %
+        #                  (backLen, backData[0] & 0x0F))
 
         # If the initial write operation was successful, write the actual data to the tag
         if status == self.MI_OK:
@@ -627,10 +603,11 @@ class MFRC522:
                 self.PCD_TRANSCEIVE, buf)
             # Check if the write operation was successful or not
             if not (status == self.MI_OK) or not (backLen == 4) or not ((backData[0] & 0x0F) == 0x0A):
-                self.logger.error("Error while writing")
+                raise ValueError(f"Error while writing, status={status}, backLen={backLen}, backData={backData}")
             # If the write operation was successful, log it
             if status == self.MI_OK:
-                self.logger.debug("Data written")
+                #self.logger.debug("Data written")
+                pass
 
     def Init(self):
         """
