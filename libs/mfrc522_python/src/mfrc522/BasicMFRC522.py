@@ -16,7 +16,7 @@ class BasicMFRC522:
         Args:
             KEY (list): The authentication key used for reading and writing data.
         """
-        self.MFRC522 = MFRC522(i2c_bus)  # Create an instance of the MFRC522 class
+        self.MFRC522 = MFRC522.MFRC522(i2c_bus)  # Create an instance of the MFRC522 class
         self.KEY = KEY  # Set the authentication key
 
     def read_sector(self, trailer_block):
