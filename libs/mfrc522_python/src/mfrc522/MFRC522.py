@@ -1,5 +1,3 @@
-from utime import sleep
-
 class MFRC522:
     MFRC522_addr = 0x28  # =40
 
@@ -281,22 +279,24 @@ class MFRC522:
         # Wait for command execution (timeout)
         i = 2000
         while True:
-            sleep(0.35)
             n = self.ReadReg(self.CommIrqReg)
             i -= 1
             # Break if interrupt request received or timeout
             if i == 0 or (n & 0x01) or (n & waitIRq):
                 break
+        # print(f"i={i}, n={n} (n&0x01={n&0x01}), waitIrq={waitIRq} (n&waitIRq={n&waitIRq})")
 
         # Clear bit framing if command is transceive
         self.ClearBitMask(self.BitFramingReg, 0x80)
 
         # Check for errors and update status accordingly
         if i != 0:
-            if (self.ReadReg(self.ErrorReg) & 0x1B) == 0x00:
+            errorReg = self.ReadReg(self.ErrorReg)
+            if (errorReg & 0x1B) == 0x00:
                 status = self.MI_OK
 
                 if n & irqEn & 0x01:
+                    # print(f"n={n}, irqEn={irqEn}")
                     status = self.MI_NOTAGERR
 
                 # Read response data if command is transceive
@@ -316,6 +316,7 @@ class MFRC522:
                     for i in range(n):
                         backData.append(self.ReadReg(self.FIFODataReg))
             else:
+                print(f"errorReg={errorReg}")
                 status = self.MI_ERR
 
         # Return response data, length, and status
@@ -390,10 +391,12 @@ class MFRC522:
                     serNumCheck = serNumCheck ^ backData[i]
                 # Check if the calculated checksum matches the 5th byte of backData
                 if serNumCheck != backData[4]:
+                    print(f"serNumCheck={serNumCheck} != backData[4]={backData[4]}")
                     # If not, set the status to MI_ERR
                     status = self.MI_ERR
             else:
                 # If backData doesn't have 5 bytes, set the status to MI_ERR
+                print(f"len(backData)={len(backData) != 5}")
                 status = self.MI_ERR
 
         # Return the status and backData
@@ -472,6 +475,7 @@ class MFRC522:
             return backData[0]
         else:
             # Return 0 if the response is not successful or has an unexpected length
+            print(f"SelectTag error: status={status}, backlen={backLen}")
             return 0
 
     def Authenticate(self, authMode, BlockAddr, Sectorkey, serNum):
