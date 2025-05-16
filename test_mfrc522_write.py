@@ -2,10 +2,10 @@ from machine import Pin, SoftI2C, I2C
 from libs.mfrc522_python.src.mfrc522.MFRC522 import MFRC522
 from utime import sleep, ticks_ms
 
-def check_block_valid_for_write(sector, block):
+def check_block_valid_for_write(sector, block, write_trailer=False):
     if sector == 0 and block == 0:
         raise RuntimeError("Cannot Write to Manufacturer Block")
-    elif block == 3:
+    elif not write_trailer and block == 3:
         raise RuntimeError("Writing to the trailer block could force encryption, be sure you know what you're doing")
 
 def test_mfrc522():
@@ -51,6 +51,7 @@ def test_mfrc522():
         data = "Hidden message!!"
         if len(data) != 16:
             raise RuntimeError("Need len 16 not {len(data)} to program a block")
+        check_block_valid_for_write(sector=sector, block=block)
 
         # Authenticate
         start_time = ticks_ms()
@@ -66,7 +67,7 @@ def test_mfrc522():
                  mfrc522.StopCrypto1()
                  continue
 
-            # Read the block to checktry:
+            # Read the block to check:
             dataRead = None
             try:
                 dataRead = mfrc522.ReadTag(sector * 4 + block)
