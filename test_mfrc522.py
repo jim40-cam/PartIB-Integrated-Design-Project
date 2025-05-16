@@ -101,6 +101,7 @@ def test_mfrc522():
         end_time = ticks_ms()
         if data is not None:
             print(f"Read in {end_time - start_time} ms Sector={sector}, block={block}, data={' '.join(hex(i) for i in data)}")
+            print(f"data_ascii={''.join(chr(i) for i in data)}")
 
         print("Done...")
 
