@@ -44,7 +44,7 @@
 from utime import sleep
 from machine import Pin, SoftI2C, I2C
 
-from libs.DFRobot_TMF8x01.python.raspberry.DFRobot_TMF8x01 import DFRobot_TMF8801, DFRobot_TMF8701
+from libs.DFRobot_TMF8x01.DFRobot_TMF8x01 import DFRobot_TMF8801, DFRobot_TMF8701
 
 def test_TMF8x01_get_distance():
     # Both options work
@@ -104,7 +104,7 @@ def test_TMF8x01_get_distance():
 
     while True:
       if(tof.is_data_ready() == True):
-        print(f"Distance = {tof.get_distance_mm()} mm{" (For TMF8701, make sure you read about mode selection above!" if device == "TMF8701" else ""}")
+        print(f"Distance = {tof.get_distance_mm()} mm{" (For TMF8701, make sure you read about mode selection above!)" if device == "TMF8701" else ""}")
       sleep(0.5)
 
 

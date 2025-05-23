@@ -11,7 +11,7 @@ Both sensors support calibration, and the conditions for obtaining valid 14-byte
 
 If the above two conditions are met, the calibration data obtained with the calibrtion.ino example demo is relatively normal. <br>
 
-![产品效果图](./resources/images/SEN0430.png)![产品效果图](./resources/images/SEN0429.png)
+![产品效果图](../../resources/images/SEN0430.png)![产品效果图](../../resources/images/SEN0429.png)
 
 
 ## Product Link（[https://www.dfrobot.com](https://www.dfrobot.com)）
@@ -33,202 +33,196 @@ If the above two conditions are met, the calibration data obtained with the cali
 It supports TMF8801 and TMF8701 TOF ranging sensors. The characteristics of these two sensors are as follows:
   Type | suport ranging mode | ranging ranges | Accuracy |
 ---------------- | ---------------- | ---------------- | ---------------- |
-TMF8801     | PROXIMITY and DISTANCE hybrid mode(only one)  |   20~240cm   | 20 ~ 100mm: +/-15mm <br> 100 ~ 200mm: +/-10mm |
+TMF8801     | PROXIMITY and DISTANCE hybrid mode(only one)  |   20~240cm   | 20~100mm: +/-15mm <br> 100~200mm: +/-10mm |
 TMF8701     | PROXIMITY mode |   0~10cm   |   >=200: +/-%5   |
 TMF8701     | DISTANCE mode  |  10~60cm   |  100~200mm: +/-10mm |
 TMF8701     | PROXIMITY and DISTANCE hybrid mode  |  0~60cm  |
 
 ## Connected
-  TMF8x01 | MCU |
+  TMF8x01 |  raspberry pi |
 ---------------- | ---------------- |
 I2C  | I2C Interface |
-EN   | not connected, floating  or connected to the io pin of MCU|
-INT  | not connected, floating  or connected to the external interruput pin of MCU|
-PIN0 | not connected, floating  or connected to the io pin of MCU or other digital device|
-PIN1 | not connected, floating  or connected to the io pin of MCU or other digital device|
+EN   | not connected, floating  or connected to the io pin of raspberry pi|
+INT  | not connected, floating  or connected to the external interruput pin of raspberry pi|
+PIN0 | not connected, floating  or connected to the io pin of raspberry pi or other digital device|
+PIN1 | not connected, floating  or connected to the io pin of raspberry pi or other digital device|
+
 
 ## Installation
+1. To use this library, first download the library file<br>
+```python
+sudo git clone https://github.com/DFRobot/DFRobot_TMF8x01
+```
+2. Open and run the routine. To execute a routine demo_x.py, enter python demo_x.py in the command line. For example, to execute the demo_calibration.py routine, you need to enter :<br>
 
-To use this library, first download the library file, paste it into the \Arduino\libraries directory, then open the examples folder and run the demo in the folder.
+```python
+python demo_calibration.py 
+或 
+python2 demo_calibration.py 
+或 
+python3 demo_calibration.py
+```
+
 
 ## Methods
-```C++
 
-  /**
-   * @fn DFRobot_TMF8x01
-   * @brief DFRobot_TMF8x01 abstract class constructor.
-   * @param enPin: The EN pin of sensor is connected to digital IO port of the MCU.
-   * @param intPin: The INT pin of sensor is connected to the exteral interrupt IO port of the MCU.
-   * @param pWire : Objects of the TwoWire class. 
-   */
-  DFRobot_TMF8x01(int enPin, int intPin, TwoWire &pWire);
-  ~DFRobot_TMF8x01();
+```python
+  '''！
+    @brief Config measurement params to enable measurement. Need to call stop_measurement to stop ranging action.
+    @param calib_m: Is an enumerated variable, which is to config measurement cailibration mode.
+    @n     eMODE_NO_CALIB  :          Measuring without any calibration data.
+    @n     eMODE_CALIB    :          Measuring with calibration data.
+    @n     eMODE_CALIB_AND_ALGOSTATE : Measuring with calibration and algorithm state.
+    @return status:
+    @n      false:  enable measurement failed.
+    @n      true:  enable measurement sucess.
+  '''
+  def start_measurement(self, calib_m):
 
-  /**
-   * @fn begin
-   * @brief initialization sensor's interface, addr, ram config to running APP0 application.
-   * @return initialization sucess return 0, fail return -1
-   */
-  int begin();
+  '''
+    @brief Config measurement params to enable measurement. Need to call stop_measurement to stop ranging action.
+    @param calib_m: Is an enumerated variable , which is to config measurement cailibration mode.
+    @n     eMODE_NO_CALIB  :          Measuring without any calibration data.
+    @n     eMODE_CALIB    :          Measuring with calibration data.
+    @n     eMODE_CALIB_AND_ALGOSTATE : Measuring with calibration and algorithm state.
+    @param mode : the ranging mode of TMF8701 sensor.
+    @n     ePROXIMITY: Raing in PROXIMITY mode,ranging range 0~10cm
+    @n     eDISTANCE: Raing in distance mode,ranging range 10~60cm
+    @n     eCOMBINE:  Raing in PROXIMITY and DISTANCE hybrid mode,ranging range 0~60cm
+    @return status:
+    @n      false:  enable measurement failed.
+    @n      true:  enable measurement sucess.
+  '''
+  def start_measurement(self, calib_m, mode):
 
-  /**
-   * @fn sleep
-   * @brief sleep sensor by software, the sensor enter sleep mode(bootloader). Need to call wakeup function to wakeup sensor to enter APP0
-   */
-  void sleep();
+  '''!
+    @brief    initialization sensor's interface, addr, ram config to running APP0 application.
+    @return   initialization sucess return 0, fail return -1
+  '''
+  def begin(self):
 
-  /**
-   * @fn wakeup
-   * @brief wakeup device from sleep mode, it will running app0
-   * @return enter app0 return true, or return false.
-   */
-  bool wakeup();
+  '''!
+    @brief  sleep sensor by software, the sensor enter sleep mode(bootloader). Need to call wakeup function to wakeup sensor to enter APP0
+  '''
+  def sleep(self):
+  
+  '''!
+    @brief  wakeup device from sleep mode, it will running app0.
+    @return enter app0 r67eturn true, or return false.
+  '''
+  def wakeup(self):
+    
+  '''!
+    @brief get a unique number of sensor .Each sensor has a unique identifier.
+    @return return 4bytes unique number:
+    @n  the byte0 of return: serial_number_0
+    @n  the byte1 of return: serial_number_1
+    @n  the byte2 of return: identification_number_1
+    @n  the byte2 of return: identification_number_0
+  '''
+  def get_unique_id(self): 
 
-  /**
-   * @fn getVersion
-   * @brief get device version.
-   * @return return string of device version,format:
-   * @n major_minor/patch_hw_serialnum
-   */
-  String getVersion();
+  '''!
+    @brief get sensor's model.
+    @return return a String:
+    @n  TMF8801: the sensor is TMF8801
+    @n  TMF8701: the sensor is TMF8701
+    @n  unknown : unknown device
+  '''
+  def get_sensor_model(self): 
 
-  /**
-   * @fn getCalibrationData
-   * @brief Get 14 bytes of calibration data.
-   * @param data Cache for storing calibration data
-   * @param len The bytes of calibration data,its value can only be 14 bytes
-   * @return Vail data return true, or return false.
-   */
-  bool getCalibrationData(uint8_t *data, uint8_t len = SENSOR_MTF8x01_CALIBRATION_SIZE);
+  '''!
+    @brief get software version of patch.
+    @return return string of device software version,format:
+    @n major.minor.patch numbers.chip id version
+  '''
+  def get_software_version(self): 
 
-  /**
-   * @fn setCalibrationData
-   * @brief set 14 bytes of calibration data.
-   * @param data Pointer to calibration data.
-   * @param len The bytes of calibration data,its value can only be 14 bytes
-   * @return set sucess return true, or return false.
-   */
-  bool setCalibrationData(uint8_t *data, uint8_t len = SENSOR_MTF8x01_CALIBRATION_SIZE);
+  '''!
+    @brief  Get 14 bytes of calibration data.
+    @return return 14 bytes of calibration data.
+  '''
+  def get_calibration_data(self): 
+    
+  '''!
+    @brief  set 14 bytes of calibration data.
+    @param l The list of 14 bytes calibration data.
+    @return set sucess return true, or return false.
+  '''
+  def set_calibration_data(self, l): 
 
-  /**
-   * @fn stopMeasurement
-   * @brief disable measurement config. Need to call startMeasurement before using this function. 
-   */
-  void stopMeasurement();
+  '''!
+    @brief  disable measurement config.
+  '''  
+  def stop_measurement(self):
 
-  /**
-   * @fn isDataReady
-   * @brief Waiting for data ready.
-   * @return if data is valid, return true, or return false.
-   */
-  bool isDataReady();
+  '''!
+    @brief  Waiting for data ready.
+    @return if data is valid, return true, or return false.
+  '''
+  def is_data_ready(self):
+    
+  '''!
+    @brief  get distance, unit mm. Before using this function, you need to call is_data_ready.
+    @return return distance value, unit mm.
+  '''  
+  def get_distance_mm(self):
 
-  /**
-   * @fn getDistance_mm
-   * @brief get distance, unit mm. Before using this function, you need to call isDataReady().
-   * @return return distance value, unit mm.
-   */
-  uint16_t getDistance_mm();
+  '''!
+    @brief  enable INT pin. If you call this function,which will report a interrupt.
+    @n signal to host by INT pin when measure data is ready.
+  '''
+  def enable_int_pin(self):
 
-  /**
-   * @fn enableIntPin
-   * @brief enable INT pin. If you call this function,which will report a interrupt
-   * @n signal to host by INT pin when measure data is ready.
-   */
-  void enableIntPin();
+  '''!
+    @brief disable INT pin.
+  '''
+  def disable_int_pin(self):
 
-  /**
-   * @fn disableIntPin
-   * @brief disable INT pin.
-   */
-  void disableIntPin();
-
-  /**
-   * @fn powerOn
-   * @brief power on sensor when power down sensor by EN pin.
-   * @return sucess return True, or return False
-   */
-  bool powerOn();
-
-  /**
-   * @fn powerDown
-   * @brief power down sensor by EN pin.
-   * @return sucess return True, or return False
-   */
-  bool powerDown();
-
-  /**
-   * @fn getI2CAddress
-   * @brief get I2C address.
-   * @return return 7 bits I2C address
-   */
-  uint8_t getI2CAddress();
-
-  /**
-   * @fn pinConfig
-   * @brief Config the pin of sensor.
-   * @param pin: The pin of sensor, example PIN0 and PIN1,which is an enumerated variable of ePin_t.
-   * @n     ePIN0:  The PIN0 of sensor config.
-   * @n     ePIN1:  The PIN1 of sensor.
-   * @n     eGPIOTotal:  both of PIN0 and PIN1.
-   * @param config:  The config of pin, which is an enumerated variable of ePinControl_t.
-   */
-  void pinConfig(ePin_t pin, ePinControl_t config);
-
-  /**
-   * @fn getJunctionTemperature_C
-   * @brief get junction temperature of sensor.
-   * @return Junction temperature of sensor, unit, Celsius.
-   */
-  int8_t getJunctionTemperature_C();
-
-  /**
-   * @fn startMeasurement
-   * @brief Config measurement params to enable measurement. Need to call stopMeasurement to stop ranging action.
-   * @param cailbMode: Is an enumerated variable of eCalibModeConfig_t, which is to config measurement cailibration mode.
-   * @n     eModeNoCalib  :          Measuring without any calibration data.
-   * @n     eModeCalib    :          Measuring with calibration data.
-   * @n     eModeCalibAndAlgoState : Measuring with calibration and algorithm state.
-   * @return status:
-   * @n      false:  enable measurement failed.
-   * @n      true:  enable measurement sucess.
-   */
-  bool startMeasurement(eCalibModeConfig_t cailbMode = eModeCalib);
-
-  /**
-   * @fn startMeasurement
-   * @brief Config measurement params to enable measurement. Need to call stopMeasurement to stop ranging action.
-   * @param cailbMode: Is an enumerated variable of eCalibModeConfig_t, which is to config measurement cailibration mode.
-   * @n     eModeNoCalib  :          Measuring without any calibration data.
-   * @n     eModeCalib    :          Measuring with calibration data.
-   * @n     eModeCalibAndAlgoState : Measuring with calibration and algorithm state.
-   * @param disMode : the ranging mode of TMF8701 sensor.
-   * @n     ePROXIMITY: Raing in PROXIMITY mode,ranging range 0~10cm
-   * @n     eDISTANCE: Raing in distance mode,ranging range 10~60cm
-   * @n     eCOMBINE:  Raing in PROXIMITY and DISTANCE hybrid mode,ranging range 0~60cm
-   * @return status:
-   * @n      false:  enable measurement failed.
-   * @n      true:  enable measurement sucess.
-   */
-  bool startMeasurement(eCalibModeConfig_t cailbMode = eModeCalib, eDistaceMode_t disMode = eCOMBINE);
+  '''!
+    @brief power on sensor when power down sensor by EN pin.
+    @return sucess return True, or return False
+  '''
+  def power_on(self):
+    
+  '''!
+    @brief power down sensor by EN pin.
+    @return sucess return True, or return False
+  '''
+  def power_down(self):
+  
+  '''!
+    @brief get I2C address.
+    @return return 7 bits I2C address
+  '''
+  def get_i2c_address(self):
+    
+  '''!
+    @brief get junction temperature of sensor.
+    @return Junction temperature of sensor, unit, Celsius.
+  '''
+  def get_junction_temperature_C(self):
+    
 ```
 
 ## Compatibility
 
-MCU                | Work Well    | Work Wrong   | Untested    | Remarks
------------------- | :----------: | :----------: | :---------: | -----
-Arduino Uno        |      √       |              |             | 
-Mega2560           |      √       |              |             | 
-Leonardo           |      X       |              |             | 
-ESP32              |      √       |              |             | 
-micro:bit          |      √       |              |             | 
-FireBeetle M0      |      √       |              |             |
-raspberry          |      √       |              |             |
+| 主板         | 通过 | 未通过 | 未测试 | 备注 |
+| ------------ | :--: | :----: | :----: | :--: |
+| RaspberryPi2 |      |        |   √    |      |
+| RaspberryPi3 |      |        |   √    |      |
+| RaspberryPi4 |  √   |        |        |      |
+
+* Python 版本
+
+| Python  | 通过 | 未通过 | 未测试 | 备注 |
+| ------- | :--: | :----: | :----: | ---- |
+| Python2 |  √   |        |        |      |
+| Python3 |  √   |        |        |      |
 
 ## History
 
 - 2021/04/06 - Version 1.0.0 released.
-
 
 ## Credits
 
