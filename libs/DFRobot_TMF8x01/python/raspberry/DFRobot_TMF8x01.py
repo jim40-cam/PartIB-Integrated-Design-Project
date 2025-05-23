@@ -11,11 +11,8 @@
   @url https://github.com/DFRobot/DFRobot_TMF8x01
 '''
 
-import sys
-import time
-import smbus
-import RPi.GPIO as GPIO
-import Drv_TMF8x01 as drv
+from utime import sleep as utime_sleep
+from utime import time as time
 
 class DFRobot_TMF8x01:
   ePROXIMITY = 0
@@ -105,12 +102,12 @@ class DFRobot_TMF8x01:
   ## last operate status, users can use this variable to determine the result of a function call. 
   last_operate_status = STA_OK
   
-  def __init__(self, enPin, intPin, bus_id):
-    self._en = enPin
-    self._intPin = intPin
-    self._bus = smbus.SMBus(bus_id)
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setwarnings(False)
+  def __init__(self, i2c_bus, i2c_address, fw_fname):
+    self.i2c_bus = i2c_bus
+    self.i2c_address = i2c_address
+    self.fw_fname = fw_fname
+    if type(i2c_bus) == "<class 'SoftI2C'>":
+      self.i2c_bus.start()
 
   def begin(self):
     '''!
@@ -118,15 +115,6 @@ class DFRobot_TMF8x01:
       @return   initialization sucess return 0, fail return -1
     '''
     self._initialize = False
-    if(self._en > -1):
-      GPIO.setup(self._en, GPIO.OUT)
-      GPIO.output(self._en, GPIO.LOW)
-      time.sleep(1)
-      GPIO.output(self._en, GPIO.HIGH)
-      time.sleep(1)
-    if(self._intPin > -1):
-      GPIO.setup(self._intPin, GPIO.IN, GPIO.PUD_UP)
-      
     self.sleep()
     self._write_bytes(self.REG_MTF8x01_ENABLE, [0x01])
     if(self._wait_for_cpu_ready() != True):
@@ -192,7 +180,7 @@ class DFRobot_TMF8x01:
     waitForTimeoutIncMs = 0.005
     t = 0
     while t < waitForTimeOutMs:
-      time.sleep(waitForTimeoutIncMs)
+      utime_sleep(waitForTimeoutIncMs)
       rslt = self._read_bytes(self.REG_MTF8x01_CONTENTS, 1)
       if rslt[0] == 0x47:
         rslt = self._read_bytes(self.REG_MTF8x01_VERSION_SERIALNUM, 4)
@@ -209,9 +197,9 @@ class DFRobot_TMF8x01:
       @n  TMF8701: the sensor is TMF8701
       @n  unknown : unknown device
     '''
-    str1 = "unknown"
     rslt = self.get_unique_id()
     rslt = (rslt >> 16)&0xFFFF
+    str1 = f"unknown ({hex(rslt)})"
     if(rslt == self.MODEL_TMF8801):
       str1 = "TMF8801"
     elif (rslt == self.MODEL_TMF8701):
@@ -252,11 +240,11 @@ class DFRobot_TMF8x01:
     if(self._initialize == False):
       #print(self._initialize)
       return list()
-    time.sleep(0.0001)
+    utime_sleep(0.0001)
     self._write_bytes(self.REG_MTF8x01_COMMAND, [0x0a])
-    time.sleep(0.0001)
+    utime_sleep(0.0001)
     if self._checkStatusRegister(0x0a) == True:
-      time.sleep(0.0001)
+      utime_sleep(0.0001)
       rslt = self._read_bytes(self.REG_MTF8x01_RESULT_NUMBER, 14)
       print(rslt)
       self._stop_command()
@@ -298,14 +286,14 @@ class DFRobot_TMF8x01:
       self._modify_cmd_set(self.CMDSET_INDEX_CMD7,self.CMDSET_BIT_ALGO, False)
     self._write_bytes(self.REG_MTF8x01_CMD_DATA7, self._measure_cmd_set)
     
-    time.sleep(0.5)
+    utime_sleep(0.5)
     #print("start_measurement end")
     if(self._checkStatusRegister(0x55) != True):
       return False
     while self._count < 4:
       if(self.is_data_ready()): 
         self.get_distance_mm()
-      time.sleep(0.002)
+      utime_sleep(0.002)
     self._measure_cmd_flag = True
     return True
     
@@ -316,10 +304,9 @@ class DFRobot_TMF8x01:
     '''
     self._measure_cmd_flag = False
     self._write_bytes(self.REG_MTF8x01_COMMAND, [0xff])
-    time.sleep(0.05)#s 50ms
+    utime_sleep(0.05)#s 50ms
     self._measure_cmd_flag = False
     self._count = 0
-    self._timestamp = 1
     self._tid = 0
 
   def is_data_ready(self):
@@ -327,13 +314,8 @@ class DFRobot_TMF8x01:
       @brief  Waiting for data ready.
       @return if data is valid, return true, or return false.
     '''
-    tid = 0
-    reliab = 0
-    t = 0
-    count = 0
     i = 0
-    #time.sleep(0.01)
-    t = time.time()
+    t = time()
     self.result_dict = dict(zip(self.result_dictKey, self._read_bytes(self.REG_MTF8x01_STATUS, 11)))
     if self.result_dict['regContents'] == 0x55:
       if self.result_dict['tid'] != self._tid:
@@ -407,10 +389,6 @@ class DFRobot_TMF8x01:
     if (self._en < 0):
       return False
 
-    time.sleep(1)
-    GPIO.output(self._en, GPIO.HIGH)
-    time.sleep(1)
-  
     self._write_bytes(self.REG_MTF8x01_ENABLE, [0x01])
     if(self._wait_for_cpu_ready() != True):
       return False
@@ -429,10 +407,6 @@ class DFRobot_TMF8x01:
       return False
     if (self._en < 0):
       return False
-    time.sleep(1)
-    GPIO.output(self._en, GPIO.LOW)
-    time.sleep(1)
-    self._addr = 0x41
     return True
 
   def get_i2c_address(self):
@@ -440,7 +414,7 @@ class DFRobot_TMF8x01:
       @brief get I2C address.
       @return return 7 bits I2C address
     '''
-    return self._addr
+    return self.i2c_address
 
   def get_junction_temperature_C(self):
     '''!
@@ -456,7 +430,118 @@ class DFRobot_TMF8x01:
     
 
   def _download_ram_patch(self):
-    pass
+    '''
+      @brief  download RAM patch.
+      @return download sucess return True, or return False
+    '''
+    if self._get_app_id() != 0x80:
+      if(self._load_bootloader() != True):
+        raise RuntimeError("load Bootloader failed")
+    bufList = [0x08,0x14,0x01,0x29]
+    bufList.append(self._cal_check_sum(bufList[1:]))
+    self._write_bytes(bufList[0],bufList[1:])
+    if(self._read_status_ack() != True):
+      raise RuntimeError("Write 1st Download command failed")
+
+    bufList = [0x08,0x43,0x02,0x00,0x00]
+    bufList.append(self._cal_check_sum(bufList[1:]))
+    self._write_bytes(bufList[0],bufList[1:])
+    if(self._read_status_ack() != True):
+      raise RuntimeError("Write 2nd Download command failed")
+
+    # open fw binary
+    try:
+      fw = open(self.fw_fname, mode='r')
+    except Exception as e:
+      print("Error opening FW file.  Are you sure it's on your Pico?  Perhaps you need to add hex to micropico:syncFileTypes (if using VSCode)?")
+      print("Exception: ", e)
+      raise
+
+    # read preamble
+    preamble = fw.readline().rstrip()
+    expected_preamble = ":020000042000DA"
+    if preamble != expected_preamble:
+      raise RuntimeError(f"Invalid fw preamble={preamble}")
+
+    # read next line
+    count = 0
+    for line in fw:
+      line = line.rstrip()
+      #print(f"line[{count}] = {line}")
+
+      colon = line[0]
+      if colon != ":":
+        raise RuntimeError(f"Invalid fw colon={colon}")
+      data = bytes.fromhex(line[1:])
+      #print(data)
+
+      size = data[0]
+      #print(f"size={size}")
+      if (5 + size) != len(data):
+        raise RuntimeError(f"Checksum seems to be in position {5+size}, but data is {len(data)} long")
+
+      counter=int.from_bytes(data[1:3])
+      #print(f"counter={counter}, expected={(count * 16)}")
+      count += 1
+
+      record = data[3]
+      #print(f"record={record}")
+
+      data_seq = data[4:-1]
+      #print(f"data_seq={data_seq}")
+
+      checksum = data[-1]
+      # Checksum is 2's complement of LSB sum of data
+      checksum_expected = 0
+      for i in data[0:-1]:
+        checksum_expected += i
+      checksum_expected &= 0xff
+      checksum_expected = ~checksum_expected
+      checksum_expected &= 0xff
+      checksum_expected += 1
+      checksum_expected &= 0xff
+      if checksum != checksum_expected:
+        raise RuntimeError(f"Chesum mismatch got={checksum}, expected={checksum_expected}")
+
+      if record == 0x00:
+        #print("Data")
+        # Write to device
+        bufList = [0x08,0x41]
+        bufList.append(size)
+        bufList += list(data_seq)
+        bufList.append(self._cal_check_sum(bufList[1:]))
+        self._write_bytes(bufList[0],bufList[1:])
+        if(self._read_status_ack() != True):
+          raise RuntimeError("Failed to write FW to device")
+      elif record == 0x01:
+        #print("End of File")
+        break
+      elif record == 0x02:
+        #print("Extended Segment Address - ignoring")
+        pass
+      elif record == 0x03:
+        #print("Start Segment Address - ignoring")
+        pass
+      elif record == 0x04:
+        #print("Extended Linear Address - ignoring")
+        pass
+      elif record == 0x05:
+        #print("Start Linear Address - ignoring")
+        pass
+      else:
+        raise RuntimeError(f"Unknown record={record}")
+
+    #print("File ended")
+
+    # done with file
+    fw.close()
+
+    # Reset
+    bufList = [0x08,0x11,0x00]
+    self._write_bytes(bufList[0],bufList[1:])
+    if not self._wait_for_cpu_ready():
+      raise RuntimeError("CPU not ready after FW write")
+    return True
 
   def _get_calibration_mode(self):
     mode = 0
@@ -499,7 +584,7 @@ class DFRobot_TMF8x01:
     #print("_waitForApplication")
     #print(t)
     while t < waitForTimeOutMs:
-      time.sleep(waitForTimeoutIncMs)
+      utime_sleep(waitForTimeoutIncMs)
       if(self._get_app_id() == 0xC0):
         return True
       t += waitForTimeoutIncMs
@@ -514,7 +599,7 @@ class DFRobot_TMF8x01:
     waitForTimeoutIncMs = 0.005
     t = 0
     while t < waitForTimeOutMs:
-      time.sleep(waitForTimeoutIncMs)
+      utime_sleep(waitForTimeoutIncMs)
       if(self._get_app_id() == 0x80):
         return True
       t += waitForTimeoutIncMs
@@ -529,8 +614,10 @@ class DFRobot_TMF8x01:
     waitForTimeoutIncMs = 0.005
     t = 0
     while t < waitForTimeOutMs:
-      time.sleep(waitForTimeoutIncMs)
-      if(self._get_cpu_state() == 0x41):
+      utime_sleep(waitForTimeoutIncMs)
+      cpu_state = self._get_cpu_state()
+      # print(f"cpu_state={cpu_state:02x}")
+      if(cpu_state == 0x41):
         return True
       t += waitForTimeoutIncMs
     return False
@@ -577,7 +664,7 @@ class DFRobot_TMF8x01:
       @brief  stop command.
     '''
     self._write_bytes(self.REG_MTF8x01_COMMAND, [0xff])
-    time.sleep(0.1)#s 50ms
+    utime_sleep(0.1)#s 50ms
 
   def _checkStatusRegister(self, value):
     waitForTimeOutMs = 1
@@ -586,40 +673,46 @@ class DFRobot_TMF8x01:
     #print(t)
     while t < waitForTimeOutMs:
       #print(t)
-      time.sleep(waitForTimeoutIncMs)
+      utime_sleep(waitForTimeoutIncMs)
       t += waitForTimeoutIncMs
       rslt = self._read_bytes(self.REG_MTF8x01_CONTENTS, 1)
       #print("%#x"%rslt[0])
       if rslt[0] == value:
         return True
     return False
-  
+
   def _write_bytes(self, reg, buf):
     self.last_operate_status = self.STA_ERR_DEVICE_NOT_DETECTED
     try:
-      self._bus.write_i2c_block_data(self._addr, reg, buf)
+      data = bytearray([reg] + buf)
+      #print(f"write: addr=0x{self.i2c_address:02x} data={', '.join(hex(i) for i in data)}")
+      self.i2c_bus.writeto(self.i2c_address, data)
       self.last_operate_status = self.STA_OK
-    except:
-      pass
+    except Exception as e:
+      print("Error writing I2C bytes:", e)
+      raise
 
   def _read_bytes(self, reg, len1):
     self.last_operate_status = self.STA_ERR_DEVICE_NOT_DETECTED
     try:
-      rslt = self._bus.read_i2c_block_data(self._addr, reg, len1)
+      self.i2c_bus.writeto(self.i2c_address, bytearray([reg]))
+      rslt = self.i2c_bus.readfrom(self.i2c_address, len1)
       self.last_operate_status = self.STA_OK
-      return rslt
-    except:
-      return [0] * len1
+      # print(f"read: addr=0x{self.i2c_address:02x} reg=0x{reg:02x} ({type(reg)}), len1={len1}, rslt={rslt}")
+      return list(rslt)
+    except Exception as e:
+      print("Error reading I2C bytes:", e)
+      raise
 
 
 
 
 class DFRobot_TMF8801(DFRobot_TMF8x01):
-  def __init__(self,enPin = -1, intPin = -1, bus_id = 1):
+  def __init__(self, i2c_bus, i2c_address=0x41):
     self._calib_data = [0x41,0x57,0x01,0xFD,0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x04]
     self._algo_state_data = [0xB1, 0xA9, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
     self._measure_cmd_set = [0x01, 0xA3, 0x00, 0x00,0x00, 0x64, 0x03, 0x84, 0x02]
-    DFRobot_TMF8x01.__init__(self,enPin,intPin, bus_id)
+    DFRobot_TMF8x01.__init__(self, i2c_bus, i2c_address, fw_fname="/libs/DFRobot_TMF8x01/python/raspberry/fw/TMF8801/main_app_3v3_k2.hex")
   
   def start_measurement(self, calib_m):
     '''!
@@ -633,56 +726,14 @@ class DFRobot_TMF8801(DFRobot_TMF8x01):
     @n      true:  enable measurement sucess.
     '''
     return self._set_caibration_mode(calib_m)
-  
-  def _download_ram_patch(self):
-    '''
-      @brief  download RAM patch.
-      @return download sucess return True, or return False
-    '''
-    if self._get_app_id() != 0x80:
-      if(self._load_bootloader() != True):
-        print("load Bootloader failed")
-        return False
-    bufList = [0x08,0x14,0x01,0x29]
-    bufList.append(self._cal_check_sum(bufList[1:]))
-    self._write_bytes(bufList[0],bufList[1:])
-    if(self._read_status_ack() != True):
-      return False
-    
-    bufList = [0x08,0x43,0x02,0x00,0x00]
-    bufList.append(self._cal_check_sum(bufList[1:]))
-    self._write_bytes(bufList[0],bufList[1:])
-    if(self._read_status_ack() != True):
-      return False
-    
-    
-    l = drv.DFRobot_TMF8801_initBuf
-    i = 0
-    flag = 0
-    while l[i] > 0:
-      bufList = [0x08,0x41]
-      flag = l[i]
-      bufList.append(flag)
-      i = i + 1
-      bufList = bufList + l[i:i+flag]
-      i = i + flag
-      bufList.append(self._cal_check_sum(bufList[1:]))
-      self._write_bytes(bufList[0],bufList[1:])
-      if(self._read_status_ack() != True):
-        return False
-    bufList = [0x08,0x11,0x00]
-    bufList.append(self._cal_check_sum(bufList[1:]))
-    self._write_bytes(bufList[0],bufList[1:])
-    if(self._wait_for_cpu_ready()):
-      return True
-    return False
-  
+
+
 class DFRobot_TMF8701(DFRobot_TMF8x01):
-  def __init__(self,enPin = -1, intPin = -1, bus_id = 1):
+  def __init__(self, i2c_bus, i2c_address=0x41):
     self._calib_data = [0x41,0x57,0x01,0xFD,0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x04]
     self._algo_state_data = [0xB1, 0xA9, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
     self._measure_cmd_set = [0x01, 0xA3, 0x00, 0x00,0x00, 0x64, 0x03, 0x84, 0x02]
-    DFRobot_TMF8x01.__init__(self,enPin, intPin, bus_id)
+    DFRobot_TMF8x01.__init__(self, i2c_bus, i2c_address, fw_fname="/libs/DFRobot_TMF8x01/python/raspberry/fw/TMF8701/main_app_3v3_k2.hex")
 
   def start_measurement(self, calib_m, mode):
     '''
@@ -712,46 +763,3 @@ class DFRobot_TMF8701(DFRobot_TMF8x01):
       self._modify_cmd_set(self.CMDSET_INDEX_CMD6,self.CMDSET_BIT_DISTANCE,True)
       self._modify_cmd_set(self.CMDSET_INDEX_CMD6,self.CMDSET_BIT_COMBINE,True)
     return self._set_caibration_mode(calib_m)
-
-  def _download_ram_patch(self):
-    '''!
-      @brief  download RAM patch.
-      @return download sucess return True, or return False
-    '''
-    if self._get_app_id() != 0x80:
-      if(self._load_bootloader() != True):
-        print("load Bootloader failed")
-        return False
-    bufList = [0x08,0x14,0x01,0x29]
-    bufList.append(self._cal_check_sum(bufList[1:]))
-    self._write_bytes(bufList[0],bufList[1:])
-    if(self._read_status_ack() != True):
-      return False
-    
-    bufList = [0x08,0x43,0x02,0x00,0x00]
-    bufList.append(self._cal_check_sum(bufList[1:]))
-    self._write_bytes(bufList[0],bufList[1:])
-    if(self._read_status_ack() != True):
-      return False
-    
-    
-    l = drv.DFRobot_TMF8801_initBuf
-    i = 0
-    flag = 0
-    while l[i] > 0:
-      bufList = [0x08,0x41]
-      flag = l[i]
-      bufList.append(flag)
-      i = i + 1
-      bufList = bufList + l[i:i+flag]
-      i = i + flag
-      bufList.append(self._cal_check_sum(bufList[1:]))
-      self._write_bytes(bufList[0],bufList[1:])
-      if(self._read_status_ack() != True):
-        return False
-    bufList = [0x08,0x11,0x00]
-    bufList.append(self._cal_check_sum(bufList[1:]))
-    self._write_bytes(bufList[0],bufList[1:])
-    if(self._wait_for_cpu_ready()):
-      return True
-    return False
