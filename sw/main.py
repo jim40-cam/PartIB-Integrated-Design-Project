@@ -9,6 +9,7 @@ from test_mfrc522 import test_mfrc522
 from test_TMF8x01_get_distance import test_TMF8x01_get_distance
 from test_STU_22L_IO_Mode import test_STU_22L_IO_Mode
 from test_STU_22L_UART import test_STU_22L_UART
+from test_tiny_code_reader import test_tiny_code_reader
 
 print("Welcome to main.py!")
 
@@ -24,5 +25,6 @@ print("Welcome to main.py!")
 # test_TMF8x01_get_distance()
 # test_STU_22L_IO_Mode()
 # test_STU_22L_UART()
+# test_tiny_code_reader()
 
 print("main.py Done!")
