@@ -36,17 +36,17 @@ for bay in bays:
         for level in levels:
             msg = f"Rack {rack}, {level}, {bay}"
 
-            # QR Code - with rect border to show the correct spec spacing
-            qr_img = qrcode.make(msg)
+            # QR Code
+            qr_img = qrcode.make(msg, border=0)
             pdf.image(qr_img.get_image(),
                       x=x,
                       y=y,
                       w=qrcode_dim,
                       h=qrcode_dim)
-            pdf.rect(x=x,
-                     y=y,
-                     w=qrcode_dim,
-                     h=qrcode_dim)
+            #pdf.rect(x=x,
+            #         y=y,
+            #         w=qrcode_dim,
+            #         h=qrcode_dim)
 
             # Label
             pdf.text(x, y + y_inc_qrcode, msg)
