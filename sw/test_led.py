@@ -3,7 +3,7 @@ from utime import sleep
 
 def test_led():
     led_pin = 28  # Pin 28 = GP28 (labelled 34 on the jumper)
-    led = Pin(28, Pin.OUT)
+    led = Pin(led_pin, Pin.OUT)
 
     while True:
         # Flash the LED
