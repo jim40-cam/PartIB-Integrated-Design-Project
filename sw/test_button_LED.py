@@ -5,6 +5,10 @@ from utime import sleep
 led_pin = 28
 led = Pin(led_pin, Pin.OUT)
 
+#Set the button pin
+button_pin = 12
+button = Pin(button_pin, Pin.IN, Pin.PULL_DOWN)
+
 #Continiously update the LED value and print said value
 while True:
   led.value(button.value())
