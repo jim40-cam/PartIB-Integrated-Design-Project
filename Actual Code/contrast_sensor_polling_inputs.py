@@ -1,5 +1,26 @@
-from machine import Pin
 from utime import sleep
+
+try:
+    from machine import Pin
+except ImportError:
+    from mock_machine import Pin
+
+class Pin:
+    IN = 0
+    PULL_DOWN = 1
+
+    def __init__(self, pin, mode, pull=None):
+        self.pin = pin
+        self.mode = mode
+        self.pull = pull
+
+    def value(self):
+        return 0
+
+    def irq(self, handler=None):
+        pass
+
+    
 
 def test_input_poll():
     "Simple poll of input"
