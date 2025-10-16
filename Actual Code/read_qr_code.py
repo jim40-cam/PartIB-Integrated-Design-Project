@@ -1,41 +1,42 @@
-# read qr code 
-
-from machine import Pin, I2C  # type: ignore (will work on pico)
+from machine import Pin, I2C # type: ignore (will work on pico)
 from time import sleep
-# will this work on pico? possibly 
+# will this work on pico? possibly
 from libs.tiny_code_reader.tiny_code_reader import TinyCodeReader #type: ignore
 
-# =============================
-# Setup
-# =============================
 
-# I2C0 on GP16 (SDA) and GP17 (SCL)
-# Change pins if you wired differently
-i2c = I2C(0, scl=Pin(17), sda=Pin(16), freq=400000)
+def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, poll_delay=None):
+    """
+    Reads a QR code using the Tiny Code Reader module over I2C.
+    
+    Args:
+        i2c_id (int): I2C bus ID (default 0)
+        scl_pin (int): GPIO pin for SCL
+        sda_pin (int): GPIO pin for SDA
+        freq (int): I2C frequency in Hz
+        poll_delay (float): optional delay override between polls
 
-# Scan I2C bus to verify device is detected
-devices = i2c.scan()
-print("I2C devices found:", devices)
+    Returns:
+        str or None: The decoded QR code string if found, otherwise None
+    """
 
-if 0x0C not in devices:
-    print("Tiny Code Reader not detected! Check wiring and power.")
-else:
-    print("Tiny Code Reader detected at address 0x0C")
+    # Initialize I2C
+    i2c = I2C(i2c_id, scl=Pin(scl_pin), sda=Pin(sda_pin), freq=freq)
 
-# Initialize the reader
-reader = TinyCodeReader(i2c)
-print("Tiny Code Reader ready — hold a QR code ~180 mm in front...")
+    devices = i2c.scan()
+    if 0x0C not in devices:
+        print("Tiny Code Reader not detected at address 0x0C.")
+        return None
 
-# =============================
-# Main loop
-# =============================
+    reader = TinyCodeReader(i2c)
+    print("Tiny Code Reader ready — scanning for QR codes...")
 
-while True:
-    code = reader.poll()  # Try to read a QR code
-    if code:
-        print(f"QR Code detected: {code}")
+    delay = poll_delay or TinyCodeReader.TINY_CODE_READER_DELAY
 
-        # Optional: small pause to avoid printing the same code repeatedly
-        sleep(1)
+    # Poll until a QR code is found
+    while True:
+        code = reader.poll()
+        if code:
+            print(f"QR Code detected: {code}")
+            return code  # return immediately once found
+        sleep(delay)
 
-    sleep(TinyCodeReader.TINY_CODE_READER_DELAY)
