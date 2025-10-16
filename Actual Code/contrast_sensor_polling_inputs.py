@@ -8,7 +8,7 @@ def test_input_poll(input_pin):
     while True:
         # Poll the value
         value = input.value()
-        print(f"Input = {value}")
+        print(f"input_pin:{input_pin} Input = {value}")
         sleep(0.2)
 
 
