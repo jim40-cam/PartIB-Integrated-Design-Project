@@ -1,9 +1,5 @@
 from utime import sleep
-
-try:
-    from machine import Pin
-except ImportError:
-    from mock_machine import Pin
+from machine import Pin
 
 class Pin:
     IN = 0
