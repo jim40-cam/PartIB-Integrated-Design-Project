@@ -22,17 +22,17 @@ class Motor:
 
 
 def prototype_1():
-    motor1 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv3 #3, which is on GP4/5
-    motor2 = Motor(dirPin=6, PWMPin=7)  # Motor 4 is controlled from Motor Driv3 #4, which is on GP6/7
+    motor3 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv2 #1, which is on GP/5
+    motor4 = Motor(dirPin=6, PWMPin=7)  # Motor 4 is controlled from Motor Driv2 #2, which is on GP6/7
 
     while True:
         print("Forward")
-        motor1.Forward()
-        motor2.Forward()
+        motor3.Forward()
+        motor4.Forward()
         sleep(1)
         print("Reverse")
-        motor1.Reverse()
-        motor2.Reverse()
+        motor3.Reverse()
+        motor4.Reverse()
         sleep(1)
 
 

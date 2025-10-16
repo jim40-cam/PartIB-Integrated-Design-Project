@@ -1,26 +1,8 @@
 from utime import sleep
 from machine import Pin
 
-class Pin:
-    IN = 0
-    PULL_DOWN = 1
-
-    def __init__(self, pin, mode, pull=None):
-        self.pin = pin
-        self.mode = mode
-        self.pull = pull
-
-    def value(self):
-        return 0
-
-    def irq(self, handler=None):
-        pass
-
-    
-
-def test_input_poll():
+def test_input_poll(input_pin):
     "Simple poll of input"
-    input_pin = 18  # Pin 18 = GP18 (labelled 24 on the jumper)
     input = Pin(input_pin, Pin.IN, Pin.PULL_DOWN) # Think carefully whether you need pull up or pull down
 
     while True:
@@ -37,9 +19,8 @@ def input_irq(p):
     print(f"Input changed, value={value}")
 
 
-def test_input_irq():
+def test_input_irq(input_pin):
     "More advanced, interrupt based input handling"
-    input_pin = 18  # Pin 18 = GP18 (labelled 24 on the jumper)
     input = Pin(input_pin, Pin.IN, Pin.PULL_DOWN) # Think carefully whether you need pull up or pull down
     input.irq(handler=input_irq) # Register irq, you could also consider rising and falling edges c.f. https://docs.micropython.org/en/latest/library/machine.Pin.html
 
@@ -48,5 +29,11 @@ def test_input_irq():
 
 
 if __name__ == "__main__":
-    test_input_poll()
+    test_input_poll(input_pin=18)
+    test_input_irq(input_pin=18)
     # test_input_irq()
+
+test_input_poll(16)
+test_input_poll(17)
+test_input_poll(18)
+test_input_poll(19)
