@@ -1,15 +1,15 @@
 from utime import sleep
 from machine import Pin
 
-def test_input_poll(input_pin):
+def test_input_poll(input_pins):
     "Simple poll of input"
-    input = Pin(input_pin, Pin.IN, Pin.PULL_DOWN) # Think carefully whether you need pull up or pull down
-
     while True:
-        # Poll the value
-        value = input.value()
-        print(f"input_pin:{input_pin} Input = {value}")
-        sleep(0.2)
+        sleep(0.1)  # Small delay to avoid busy looping
+        for pin in input_pins:
+            input = Pin(pin, Pin.IN, Pin.PULL_DOWN) # Think carefully whether you need pull up or pull down
+            print(f"input_pin:{pin} Input = {input.value()}")
+
+
 
 
 def input_irq(p):
@@ -27,13 +27,4 @@ def test_input_irq(input_pin):
     while True:
         pass # irq handling does the rest in this instance
 
-
-if __name__ == "__main__":
-    test_input_poll(input_pin=18)
-    test_input_irq(input_pin=18)
-    # test_input_irq()
-
-test_input_poll(16)
-test_input_poll(17)
-test_input_poll(18)
-test_input_poll(19)
+test_input_poll([16,17,18,19])
