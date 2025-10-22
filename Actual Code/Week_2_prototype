@@ -36,5 +36,4 @@ def prototype_1():
         sleep(1)
 
 
-if __name__ == "__main__":
-    prototype_1()
+prototype_1()

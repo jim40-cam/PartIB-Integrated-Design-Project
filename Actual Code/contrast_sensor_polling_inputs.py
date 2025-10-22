@@ -13,10 +13,9 @@ def input_irq(input):
     "Interrupt handler"
     # print(p)
     value = input.value()
-    print(f"Input changed on, value={value}")
+    print(f"Input changed {pin_number}, value={value}")
 
-
-def test_input_irq(input_pins):
+def test_input_irqs(input_pins):
     "More advanced, interrupt based input handling"
     for pin in input_pins:
         input = Pin(pin, Pin.IN, Pin.PULL_DOWN) # Think carefully whether you need pull up or pull down
@@ -26,6 +25,6 @@ def test_input_irq(input_pins):
         pass # irq handling does the rest in this instance
 
 input_pins = [16,17,18,19]
-test_input_irq(input_pins)
 #test_input_poll([16,17,18,19])
-
+pin_number = 0
+test_input_poll(input_pins)
