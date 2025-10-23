@@ -3,7 +3,7 @@ from utime import sleep
 
 def test_input_poll():
     "Simple poll of input"
-    input_pin = 18  # Pin 18 = GP18 (labelled 24 on the jumper)
+    input_pin = 16  # Pin 18 = GP18 (labelled 24 on the jumper)
     input = Pin(input_pin, Pin.IN, Pin.PULL_DOWN) # Think carefully whether you need pull up or pull down
 
     while True:
