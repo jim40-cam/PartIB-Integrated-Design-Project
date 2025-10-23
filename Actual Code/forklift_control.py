@@ -56,7 +56,7 @@ def stop_actuator():
     in2.value(0)
 
 # ==============================
-# SERVO CONTROL
+# SERVO CONTROL, probabbly won't use this 
 # ==============================
 def rotate_fork(angle):
     """Rotate servo to a given angle (0–270°)."""
