@@ -1,14 +1,41 @@
-from machine import Pin
+from machine import Pin, PWM
 from utime import sleep
+import _thread 
 
-pin = Pin("LED", Pin.OUT)
+class Motor:
+    def __init__(self, dirPin, PWMPin):
+        self.mDir = Pin(dirPin, Pin.OUT)  # set motor direction pin
+        self.pwm = PWM(Pin(PWMPin))  # set motor pwm pin
+        self.pwm.freq(1000)  # set PWM frequency
+        self.pwm.duty_u16(0)  # set duty cycle - 0=off
+        
+    def off(self):
+        self.pwm.duty_u16(0)
+        
+    def Forward(self, speed=100):
+        self.mDir.value(0)                     # forward = 0 reverse = 1 motor
+        self.pwm.duty_u16(int(65535 * speed / 100))  # speed range 0-100 motor
 
-print("LED starts flashing...")
-while True:
-    try:
-        pin.value(not pin.value())
-        sleep(1) # sleep 1sec
-    except KeyboardInterrupt:
-        break
-pin.off()
-print("Finished.")
+    def Reverse(self, speed=30):
+        self.mDir.value(1)
+        self.pwm.duty_u16(int(65535 * speed / 100))
+
+
+
+def prototype_1():
+    motor3 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv2 #1, which is on GP/5
+    motor4 = Motor(dirPin=7, PWMPin=6)  # Motor 4 is controlled from Motor Driv2 #2, which is on GP6/7
+
+    # Set both motors to move backward
+    motor3.Reverse(60)  # Motor 3 moves backward at 50% speed
+    motor4.Forward(50)  # Motor 4 moves backward at 50% speed
+
+    # Keep the motors running for a specific duration
+    sleep(10)  # Run both motors for 1 second
+
+    # Turn off both motors
+    motor3.off()
+    motor4.off()
+
+
+prototype_1()
