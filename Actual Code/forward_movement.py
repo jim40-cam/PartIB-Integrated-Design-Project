@@ -2,6 +2,8 @@ from machine import Pin, PWM
 from utime import sleep
 import _thread
 from class_definitions import Motor
+from right_turn import intright
+from left_turn import intleft
 
 def forward():
     motor3 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv2 #1, which is on GP/5
@@ -18,25 +20,38 @@ def forward():
         if input16.value() == 0 and input17.value() == 0:
             motor3.Forward(60)  # Motor 3 moves backward at 60% speed
             motor4.Forward(60)  # Motor 4 moves forward at 50% speed
-
+            
         elif input16.value() == 1 and input17.value() == 0:
             motor3.Forward(60)  # Motor 3 moves backward at 70% speed
-            motor4.Forward(75)  # Motor 4 moves forward at 60% speed
+            motor4.Forward(80)  # Motor 4 moves forward at 60% speed
 
         elif input16.value() == 0 and input17.value() == 1:
-            motor3.Forward(75)  # Motor 3 moves backward at 60% speed
+            motor3.Forward(80)  # Motor 3 moves backward at 60% speed
             motor4.Forward(60)  # Motor 4 moves forward at 70% speed
+            
         elif input16.value() == 1 and input18.value() == 1:
-            break()
+            input_pin = 18 
+            input = Pin(input_pin, Pin.IN, Pin.PULL_DOWN) # Think carefully whether you need pull up or pull down
+            input.irq(handler=intleft) # Register irq, you could also consider rising and falling edges c.f. https://docs.micropython.org/en/latest/library/machine.Pin.html
+            sleep(0.1)
+            motor3.off()
+            motor4.off()
+            sleep(3)
+            
         elif input17.value() == 1 and input19.value() == 1:
-            break()
+            input_pin = 19 
+            input = Pin(input_pin, Pin.IN, Pin.PULL_DOWN) # Think carefully whether you need pull up or pull down
+            input.irq(handler=intright) # Register irq, you could also consider rising and falling edges c.f. https://docs.micropython.org/en/latest/library/machine.Pin.html
+            sleep(0.1)
+            motor3.off()
+            motor4.off()
+            sleep(3)
         elif input16.value() == 1 and input17.value() == 1:
-            break()
+            motor3.off()
+            motor4.off()
         sleep(0.1)  # Small delay to avoid overwhelming the CPU
-
-    motor3.off()
-    motor4.off()
-
         
 forward()
+
+
 
