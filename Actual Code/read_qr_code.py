@@ -1,5 +1,3 @@
-
-
 from machine import Pin, I2C
 from time import sleep
 from libs.tiny_code_reader.tiny_code_reader import TinyCodeReader #type: ignore

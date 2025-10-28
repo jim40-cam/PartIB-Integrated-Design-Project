@@ -56,16 +56,6 @@ def stop_actuator():
     in2.value(0)
 
 # ==============================
-# SERVO CONTROL, probabbly won't use this 
-# ==============================
-def rotate_fork(angle):
-    """Rotate servo to a given angle (0–270°)."""
-    angle = max(0, min(angle, 270))
-    duty = _servo_angle_to_duty(angle)
-    servo.duty_u16(duty)
-    print(f"Rotating fork to {angle}° (duty={duty})")
-
-# ==============================
 # EXAMPLE TEST
 # ==============================
 if __name__ == "__main__":
@@ -73,10 +63,6 @@ if __name__ == "__main__":
 
     # Example: Lift up 23 mm (tune duration as needed)
     lift_up(duration_s=2.0)
-    time.sleep(2)
-
-    # Example: Rotate fork slightly
-    rotate_fork(45)
     time.sleep(2)
 
     # Lower back down
