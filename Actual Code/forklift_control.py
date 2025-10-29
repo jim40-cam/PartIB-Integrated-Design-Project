@@ -55,15 +55,3 @@ def stop_actuator():
     in1.value(0)
     in2.value(0)
 
-# ==============================
-# EXAMPLE TEST
-# ==============================
-if __name__ == "__main__":
-    print("Testing forklift control...")
-
-    # Example: Lift up 23 mm (tune duration as needed)
-    lift_up(duration_s=2.0)
-    time.sleep(2)
-
-    # Lower back down
-    lift_down(duration_s=2.0)

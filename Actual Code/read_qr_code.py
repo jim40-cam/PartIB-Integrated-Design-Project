@@ -85,7 +85,7 @@ def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_
 
     # Wait until within target distance, may need to experiment to find what this is 
     while True:
-        distance = tof.read()
+        distance = tof.read() - 40 # adjust for sensor offset
         print(f"Distance: {distance} mm")
         if abs(distance - target_distance_mm) <= distance_tolerance:
             print("Within target distance.")
