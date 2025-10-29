@@ -109,5 +109,7 @@ def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_
             print(f"QR Code detected: {code}")
             parsed = parse_qr(code)
             print(f"QR list: {parsed}")
+            if parsed:
+                return tuple(parsed)  #Return a tuple instead: lists can't be used as a key in dictionaries
             return parsed
         sleep(delay)
