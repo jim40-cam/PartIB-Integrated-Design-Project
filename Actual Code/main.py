@@ -6,4 +6,7 @@ from track_current_location import tracking
 from forward_movement import forward
 from machine import Pin, PWM
 from utime import sleep
+from final_location_reader import location_movement
 
+location = "fflffrf"
+location_movement(location)

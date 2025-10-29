@@ -6,7 +6,7 @@ from right_turn import intright
 from left_turn import intleft
 from forward_movement import forward
 
-def tracking()
+def tracking():
     motor3 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv2 #1, which is on GP/5
     motor4 = Motor(dirPin=7, PWMPin=6)  # Motor 4 is controlled from Motor Driv2 #2, which is on GP6/7
 
