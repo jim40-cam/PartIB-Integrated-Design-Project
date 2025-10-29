@@ -1,10 +1,11 @@
 # forklift_control.py
-from machine import Pin, PWM #type: ignore (will work on pico)
+from machine import Pin, PWM, I2C #type: ignore (will work on pico)
 import time
+from libs.VL53L0X.VL53L0X import VL53L0X #type: ignore
+from time import sleep
+from .forward_movement import Motor
 
-# ==============================
 # LINEAR ACTUATOR SETUP
-# ==============================
 ENA_PIN = 5
 IN1_PIN = 4
 IN2_PIN = 3
@@ -14,24 +15,8 @@ in1 = Pin(IN1_PIN, Pin.OUT)
 in2 = Pin(IN2_PIN, Pin.OUT)
 ena.value(1)  # Enable motor driver
 
-# ==============================
-# SERVO SETUP (DSS-M15S)
-# ==============================
-# Main control on GP13
-SERVO_PIN = 13
-servo = PWM(Pin(SERVO_PIN))
-servo.freq(50)  # Standard 50 Hz servo signal
-
-# Helper: convert angle (0–270°) → duty cycle for 1–2 ms pulse width
-def _servo_angle_to_duty(angle):
-    min_duty = 1638   # corresponds to 1.0 ms at 50 Hz
-    max_duty = 8192   # corresponds to 2.0 ms at 50 Hz
-    duty = int(min_duty + (angle / 270) * (max_duty - min_duty))
-    return max(min(duty, max_duty), min_duty)
-
-# ==============================
 # LINEAR ACTUATOR CONTROL
-# ==============================
+
 def lift_up(duration_s=3.0): #edit time to change lift height
     """Extend actuator to lift forklift up."""
     print("Lifting up...")
@@ -55,29 +40,70 @@ def stop_actuator():
     in1.value(0)
     in2.value(0)
 
-# ==============================
-# SERVO CONTROL
-# ==============================
-def rotate_fork(angle):
-    """Rotate servo to a given angle (0–270°)."""
-    angle = max(0, min(angle, 270))
-    duty = _servo_angle_to_duty(angle)
-    servo.duty_u16(duty)
-    print(f"Rotating fork to {angle}° (duty={duty})")
+# FORKLIFT FUNCTION 
 
-# ==============================
-# EXAMPLE TEST
-# ==============================
-if __name__ == "__main__":
-    print("Testing forklift control...")
+def pick_up_box(
+    i2c_id=0,
+    scl_pin=17,
+    sda_pin=16,
+    freq=400000,
+    approach_distance=20,   # distance in mm at which to start pickup
+    box_present_threshold=40,  # consider "box detected" if <40mm away
+    lift_down_time=2.0,
+    lift_up_time=2.0
+):
+    """
+    1. Wait until the box is within `approach_distance` mm.
+    2. Lower forks.
+    3. Move robot forward to slide under box.
+    4. Lift forks.
+    5. Confirm box presence using VL53L0X.
+    """
+    # Setup I2C and distance sensor
+    i2c = I2C(i2c_id, scl=Pin(scl_pin), sda=Pin(sda_pin), freq=freq)
+    tof = VL53L0X(i2c)
+    print("VL53L0X sensor ready.")
 
-    # Example: Lift up 23 mm (tune duration as needed)
-    lift_up(duration_s=2.0)
-    time.sleep(2)
+    # Wait until close enough to box
+    # Do i need to add a while moving forward here????
+    print("Approaching box...")
+    while True:
+        distance = tof.read() - 40  # subtract your 40mm offset
+        print(f"Distance: {distance} mm")
+        if distance <= approach_distance:
+            print("Box within pickup range.")
+            break
+        sleep(0.05)
 
-    # Example: Rotate fork slightly
-    rotate_fork(45)
-    time.sleep(2)
+    # Lower forks
+    print("Lowering forks...")
+    lift_down(lift_down_time)
 
-    # Lower back down
-    lift_down(duration_s=2.0)
+    # --- Move robot forward slightly ---
+    print("Moving forward to engage box...")
+
+    motor3 = Motor(dirPin=4, PWMPin=5)
+    motor4 = Motor(dirPin=7, PWMPin=6)
+
+    motor3.Forward(50)
+    motor4.Forward(50)
+    sleep(1.0)   # move forward for 1 second — adjust for your setup
+    motor3.off()
+    motor4.off()
+    print("Robot positioned under box.")
+
+    # Lift box
+    print("Lifting box...")
+    lift_up(lift_up_time)
+
+    # Confirm pickup 
+    sleep(0.5)  # small pause before measuring again
+    distance_after = tof.read() - 40
+    print(f"Distance after lift: {distance_after} mm")
+
+    if distance_after <= box_present_threshold:
+        print("Success")
+        return True
+    else:
+        print("Oops")
+        return False

@@ -1,35 +1,59 @@
+
+# def parse_qr_code(code_str):
+#     """
+#     Parse a QR code string like 'Rack A, Upper, 6' into a structured dict:
+#       {'rack': 'A', 'level': 'U', 'position': 6}
+#     """
+#     try:
+#         parts = [p.strip() for p in code_str.split(",")]
+#         rack = parts[0].replace("Rack", "").strip().upper()  # 'A' or 'B'
+#         level_word = parts[1].strip().capitalize()  # 'Upper' or 'Lower'
+#         level = 'U' if level_word == 'Upper' else 'L'
+#         position = int(parts[2])
+#         return {"rack": rack, "level": level, "position": position}
+#     except Exception as e:
+#         print(f"Error parsing QR code '{code_str}': {e}")
+#         return {"raw": code_str}
+
 from machine import Pin, I2C # type: ignore (will work on pico)
 from time import sleep
 # will this work on pico? possibly
 from libs.tiny_code_reader.tiny_code_reader import TinyCodeReader #type: ignore
 from libs.VL53L0X.VL53L0X import VL53L0X #type: ignore
 
-def qr_to_vector(code_str):
+def parse_qr(code_str):
     """
-    Convert QR code string into numeric vector [rack_id, level_id, position].
-        rack_id: 0 for Rack A, 1 for Rack B
-        level_id: 0 for Lower, 1 for Upper
+    Convert QR code string into list [rack, level, position].
+        rack: 'A' or 'B'
+        level: 'L' for Lower, 'U' for Upper
         position: int 1–6
 
     Args:
-        code_str (str): QR code string in format "RACK_LEVEL_POSITION"
+        code_str (str): QR code string in format like "Rack A, Lower, 6"
 
     Returns:
-        list[int] or None: [rack_id, level_id, position] or None if invalid
+        list or None: ['A', 'L', 6] or ['B', 'U', 3], or None if invalid
     """
     try:
         parts = [p.strip() for p in code_str.split(',')]
-        rack_str = parts[0].split()[-1].upper() # A or B
-        level_str = parts[1].capitalize() # Upper or Lower
-        pos = int(parts[2]) # 1-6
+        rack_str = parts[0].split()[-1].upper()   # A or B
+        level_str = parts[1].capitalize()         # Upper or Lower
+        pos = int(parts[2])                       # 1–6
 
-        rack = 0 if rack_str == 'A' else 1 if rack_str == 'B' else None
-        level = 0 if level_str == 'Lower' else 1 if level_str == 'Upper' else None
+        # Convert to compact form
+        level_short = 'L' if level_str == 'Lower' else 'U' if level_str == 'Upper' else None
 
-        return[rack, level, pos] if None not in (rack, level) and 1 <= pos <= 6 else None
+        if rack_str in ('A', 'B') and level_short in ('L', 'U') and 1 <= pos <= 6:
+            parsed = [rack_str, level_short, pos]
+            return parsed
+        else:
+            print(f"Invalid QR code format: {code_str}")
+            return None
+
     except Exception as e:
         print(f"Error parsing QR code '{code_str}': {e}")
         return None
+
 
 def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_mm=180, distance_tolerance=10, poll_delay=None):
     """
@@ -59,9 +83,9 @@ def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_
     tof = VL53L0X(i2c)
     print("Distance sensor initialised.")
 
-    # Wait until within target distance
+    # Wait until within target distance, may need to experiment to find what this is 
     while True:
-        distance = tof.read()
+        distance = tof.read() - 40 # adjust for sensor offset
         print(f"Distance: {distance} mm")
         if abs(distance - target_distance_mm) <= distance_tolerance:
             print("Within target distance.")
@@ -83,8 +107,7 @@ def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_
         code = reader.poll()
         if code:
             print(f"QR Code detected: {code}")
-            vector = qr_to_vector(code)
-            print(f"QR vector: {vector}")
-            return vector
+            parsed = parse_qr(code)
+            print(f"QR list: {parsed}")
+            return parsed
         sleep(delay)
-
