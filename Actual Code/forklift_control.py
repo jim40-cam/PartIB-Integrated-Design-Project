@@ -50,7 +50,7 @@ def pick_up_box(
     approach_distance=20,   # distance in mm at which to start pickup
     box_present_threshold=40,  # consider "box detected" if <40mm away
     lift_down_time=2.0,
-    lift_up_time=2.0
+    lift_up_time=2.0 # will need to adjust based on actual lift height
 ):
     """
     1. Wait until the box is within `approach_distance` mm.
@@ -65,8 +65,8 @@ def pick_up_box(
     print("VL53L0X sensor ready.")
 
     # Wait until close enough to box
-    # Do i need to add a while moving forward here????
-    print("Approaching box...")
+    # Needs to also be moving towards box as this is going on?? Or will the robot be moving forward anyway?
+    # I assume the robot is already moving forward when this function is called
     while True:
         distance = tof.read() - 40  # subtract your 40mm offset
         print(f"Distance: {distance} mm")
