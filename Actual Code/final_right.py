@@ -29,7 +29,7 @@ def intright(p):
     input_pin = 7
     input = Pin(input_pin, Pin.IN, Pin.PULL_DOWN)  # Think carefully whether you need pull up or pull down
     input.irq(handler=stopright)
-
+    sleep(1.5)
     motor3.off()
     motor4.off()
 
@@ -37,7 +37,8 @@ def stopright(p):
     value = p.value()
     motor3 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv2 #1, which is on GP/5
     motor4 = Motor(dirPin=7, PWMPin=6)  # Motor 4 is controlled from Motor Driv2 #2, which is on GP6/7
-    if value == 0:
+    print( f"Stopping right turn, value={value}")
+    if value == 1:
         motor3.off()
         motor4.off()
 
