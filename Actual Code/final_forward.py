@@ -27,7 +27,7 @@ def forward():
             motor3.Forward(80)  # Motor 3 moves backward at 60% speed
             motor4.Forward(60)  # Motor 4 moves forward at 70% speed
         
-        elif input8.value() == 1 or input9.value() == 1:
+        elif input10.value() == 1 or input9.value() == 1:
             motor3.off()
             motor4.off()
             
