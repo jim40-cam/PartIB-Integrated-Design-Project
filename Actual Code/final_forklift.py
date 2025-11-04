@@ -3,8 +3,9 @@ from machine import Pin, PWM, I2C # type: ignore (will work on pico)
 from time import sleep
 from libs.VL53L0X.VL53L0X import VL53L0X #type: ignore
 from final_forward import Motor, forward
+# from final_right import ? ask haruto 
 
-def turn_around(turn_time=3.6, speed3=60, speed4=60): # check speeds, slightly different for each motor
+def turn_around(turn_time=5, speed3=60, speed4=60): # check speeds, slightly different for each motor
     """
     Spin robot 180 degrees in place.
     Adjust turn_time for your specific robot’s rotation speed.
@@ -139,8 +140,8 @@ def pick_up_box(
     #     return False
     
 
-    # Turn around 180*
-    turn_around(turn_time=1.8, speed3=60, speed4=60)  # adjust time and speeds as needed
+    # Turn around 180*, turn right twice
+    #turn_around(turn_time=1.8, speed3=60, speed4=60)  # adjust time and speeds as needed
 
     # Call forward() to move it forward to next junction
     forward() 
