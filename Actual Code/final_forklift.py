@@ -127,6 +127,7 @@ def pick_up_box(
 
     # --- Lift box ---
     lift_up(duration_s=lift_up_time, speed=20)
+    sleep(1.0)  # small pause before moving forward again
 
     # # --- Confirm pickup ---
     # sleep(0.5)
