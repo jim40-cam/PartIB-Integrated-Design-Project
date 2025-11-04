@@ -185,14 +185,14 @@ def put_down_box(
     # --- Upper bay sequence ---
     if parsed[1] == 'U':
         print("Upper bay detected — placing box at upper level...")
-        lift_down(duration_s=lift_down_time, speed=10)
+        lift_down(duration_s=lift_down_time, speed=20)
 
     # --- Lower bay sequence ---
     elif parsed[1] == 'L':
         print("Lower bay detected — performing two-step lowering sequence...")
         # Step 1: lower slightly
         print("Lowering partially...")
-        lift_down(duration_s=partial_down_time, speed=10)
+        lift_down(duration_s=partial_down_time, speed=20)
 
         # Step 2: move back slightly to position
         print("Reversing to position for full lowering...")
