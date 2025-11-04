@@ -87,7 +87,7 @@ def pick_up_box(
     """
     # --- Setup distance sensor ---
     i2c = I2C(i2c_id, scl=Pin(scl_pin), sda=Pin(sda_pin), freq=freq)
-    tof = VL53L0X(i2c)
+    #tof = VL53L0X(i2c)
     print("VL53L0X sensor ready.")
 
     motor3 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv2 #1, which is on GP/5
@@ -102,13 +102,13 @@ def pick_up_box(
 
     # --- Wait until close enough to box ---
     # does this check need to be done???
-    while True:
-        distance = tof.read() - 40  # apply offset
-        print(f"Distance: {distance} mm")
-        if distance <= approach_distance:
-            print("Box within pickup range.")
-            break
-        sleep(0.05)
+    # while True:
+    #     distance = tof.read() - 40  # apply offset
+    #     print(f"Distance: {distance} mm")
+    #     if distance <= approach_distance:
+    #         print("Box within pickup range.")
+    #         break
+    #     sleep(0.05)
 
     # --- Lower forks ---
     lift_down(duration_s=lift_down_time, speed=20)
@@ -127,16 +127,16 @@ def pick_up_box(
     # --- Lift box ---
     lift_up(duration_s=lift_up_time, speed=20)
 
-    # --- Confirm pickup ---
-    sleep(0.5)
-    distance_after = tof.read() - 40
-    print(f"Distance after lift: {distance_after} mm")
+    # # --- Confirm pickup ---
+    # sleep(0.5)
+    # distance_after = tof.read() - 40
+    # print(f"Distance after lift: {distance_after} mm")
 
-    if distance_after <= box_present_threshold:
-        print("Box successfully picked up!")
-    else:
-        print("Box pickup failed.")
-        return False
+    # if distance_after <= box_present_threshold:
+    #     print("Box successfully picked up!")
+    # else:
+    #     print("Box pickup failed.")
+    #     return False
     
 
     # Turn around 180*
