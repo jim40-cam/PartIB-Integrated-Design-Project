@@ -7,8 +7,7 @@ from libs.VL53L0X.VL53L0X import VL53L0X #type: ignore
 
 def parse_qr(code_str):
     """
-    Convert QR code string into list [rack, level, position].
-    Now tuple, list can't be dictionary key
+    Convert QR code string into tuple (rack, level, position).
         rack: 'A' or 'B'
         level: 'L' for Lower, 'U' for Upper
         position: int 1–6
@@ -17,7 +16,7 @@ def parse_qr(code_str):
         code_str (str): QR code string in format like "Rack A, Lower, 6"
 
     Returns:
-        list or None: ['A', 'L', 6] or ['B', 'U', 3], or None if invalid
+        tuple or None: ('A', 'L', 6) or None if invalid
     """
     try:
         parts = [p.strip() for p in code_str.split(',')]
@@ -29,7 +28,7 @@ def parse_qr(code_str):
         level_short = 'L' if level_str == 'Lower' else 'U' if level_str == 'Upper' else None
 
         if rack_str in ('A', 'B') and level_short in ('L', 'U') and 1 <= pos <= 6:
-            parsed = [rack_str, level_short, pos]
+            parsed = (rack_str, level_short, pos)
             return parsed
         else:
             print(f"Invalid QR code format: {code_str}")
@@ -43,10 +42,7 @@ def parse_qr(code_str):
 def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_mm=200, distance_tolerance=10, poll_delay=None):
     """
      Wait until robot is ~target_distance_mm away, then read a QR code and 
-    convert it into a numeric vector [rack_id, level_id, position].
-        rack_id: 0 for Rack A, 1 for Rack B
-        level_id: 0 for Lower, 1 for Upper
-        position: int 1–6
+    convert it into a tuple
     
     Args:
         i2c_id (int): I2C bus ID (default 0)
