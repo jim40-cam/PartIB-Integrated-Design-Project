@@ -59,6 +59,7 @@ def pick_up_box(
     lift_up_time=2.0
 ):
     """
+    0. Move forward
     1. Wait until the box is within `approach_distance` mm.
     2. Lower forks.
     3. Move robot forward to slide under box.
@@ -70,7 +71,18 @@ def pick_up_box(
     tof = VL53L0X(i2c)
     print("VL53L0X sensor ready.")
 
+    motor3 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv2 #1, which is on GP/5
+    motor4 = Motor(dirPin=7, PWMPin=6)  # Motor 4 is controlled from Motor Driv2 #2, which is on GP6/7
+    
+    motor3.Forward(60)
+    motor4.Forward(60)
+    sleep(0.8)
+    motor3.off()
+    motor4.off()
+
+
     # --- Wait until close enough to box ---
+    # does this check need to be done???
     while True:
         distance = tof.read() - 40  # apply offset
         print(f"Distance: {distance} mm")

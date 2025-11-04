@@ -1,4 +1,5 @@
 # forklift_control.py
+from class_definitions import Motor
 from machine import Pin, PWM, I2C #type: ignore (will work on pico)
 import time
 from libs.VL53L0X.VL53L0X import VL53L0X #type: ignore
