@@ -157,6 +157,7 @@ def put_down_box(
     lift_down_time=11.0,     # duration for full lowering
     partial_down_time=2.0,   # duration for partial lowering
     move_back_time=1.0       # how long to reverse after placing box
+    # Need to test to confirm all of these times
 ):
     """
     Place a box based on whether it belongs to the Upper or Lower rack.
