@@ -1,5 +1,6 @@
 # Routes from a pickup location to a rack position
 
+#intakes "parsed" tuple from scan_qr_code and returns "frl" string in "location" free variable
 yellow_locations_routes = {
     ("A", "L", 1): "lfffrffffffrf",        #from T junction to end of dropping line
     ("A", "L", 2): "lfffrfffffrf",
@@ -26,13 +27,13 @@ yellow_locations_routes = {
     ("B", "U", 5): "rflfffffffflflflflffrf",
     ("B", "U", 6): "rflfffffffflflflflfrf" }
 
-red_location_routes = {
-    ("A", "L", 1): "lfffrffffffrf",        #from T junction to end of dropping line
-    ("A", "L", 2): "lfffrfffffrf",
-    ("A", "L", 3): "lfffrffffrf",
-    ("A", "L", 4): "lfffrfffrf",
-    ("A", "L", 5): "lfffrffrf",
-    ("A", "L", 6): "lfffrfrf",
+red_locations_routes = {
+    ("A", "L", 1): "lfrlfffrffffffrf",        #from T junction to end of dropping line
+    ("A", "L", 2): "lfrlfffrfffffrf",
+    ("A", "L", 3): "lfrlfffrffffrf",
+    ("A", "L", 4): "lfrlfffrfffrf",
+    ("A", "L", 5): "lfrlfffrffrf",
+    ("A", "L", 6): "lfrlfffrfrf",
     ("A", "U", 1): "rflfffffffflflfrfrflf",
     ("A", "U", 2): "rflfffffffflflfrfrfflf",
     ("A", "U", 3): "rflfffffffflflfrfrffflf",
