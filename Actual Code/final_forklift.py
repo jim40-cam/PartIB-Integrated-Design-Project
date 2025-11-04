@@ -55,8 +55,8 @@ def pick_up_box(
     freq=400000,
     approach_distance=20,      # distance (mm) at which to start pickup
     box_present_threshold=40,  # consider "box detected" if <40 mm away
-    lift_down_time=2.0,
-    lift_up_time=2.0
+    lift_down_time=11.0,
+    lift_up_time=11.0
 ):
     """
     0. Move forward
@@ -106,7 +106,7 @@ def pick_up_box(
     print("Robot positioned under box.")
 
     # --- Lift box ---
-    lift_up(duration_s=lift_up_time, speed=10)
+    lift_up(duration_s=lift_up_time, speed=20)
 
     # --- Confirm pickup ---
     sleep(0.5)
