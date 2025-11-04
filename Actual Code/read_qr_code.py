@@ -1,20 +1,4 @@
 
-# def parse_qr_code(code_str):
-#     """
-#     Parse a QR code string like 'Rack A, Upper, 6' into a structured dict:
-#       {'rack': 'A', 'level': 'U', 'position': 6}
-#     """
-#     try:
-#         parts = [p.strip() for p in code_str.split(",")]
-#         rack = parts[0].replace("Rack", "").strip().upper()  # 'A' or 'B'
-#         level_word = parts[1].strip().capitalize()  # 'Upper' or 'Lower'
-#         level = 'U' if level_word == 'Upper' else 'L'
-#         position = int(parts[2])
-#         return {"rack": rack, "level": level, "position": position}
-#     except Exception as e:
-#         print(f"Error parsing QR code '{code_str}': {e}")
-#         return {"raw": code_str}
-
 from machine import Pin, I2C # type: ignore (will work on pico)
 from time import sleep
 # will this work on pico? possibly
@@ -83,7 +67,10 @@ def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_
     tof = VL53L0X(i2c)
     print("Distance sensor initialised.")
 
+    # move it forward about 5cm from start junction, add code here
+
     # Wait until within target distance, may need to experiment to find what this is 
+    # do we still need this ?????
     while True:
         distance = tof.read() - 40 # adjust for sensor offset
         print(f"Distance: {distance} mm")
