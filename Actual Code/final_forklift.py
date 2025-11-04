@@ -49,7 +49,7 @@ actuator = Actuator(dirPin=0, PWMPin=1)  # adjust pins if needed
 def lift_up(duration_s=3.0, speed=10):
     """Extend actuator to lift forklift up."""
     print(f"Lifting up for {duration_s}s at {speed}% speed...")
-    actuator.set(direction=0, speed=speed)  # extend
+    actuator.set(direction=1, speed=speed)  # retract (up)
     sleep(duration_s)
     actuator.stop()
     print("Lift up complete.")
@@ -58,7 +58,7 @@ def lift_up(duration_s=3.0, speed=10):
 def lift_down(duration_s=3.0, speed=10): # edit speeds when testing
     """Retract actuator to lower forklift."""
     print(f"Lowering down for {duration_s}s at {speed}% speed...")
-    actuator.set(direction=1, speed=speed)  # retract
+    actuator.set(direction=0, speed=speed)  # extend (down)
     sleep(duration_s)
     actuator.stop()
     print("Lift down complete.")
