@@ -4,7 +4,7 @@ from time import sleep
 from libs.VL53L0X.VL53L0X import VL53L0X #type: ignore
 from final_forward import Motor, forward
 
-def turn_around(turn_time=1.8, speed3=60, speed4=60): # check speeds, slightly different for each motor
+def turn_around(turn_time=3.6, speed3=60, speed4=60): # check speeds, slightly different for each motor
     """
     Spin robot 180 degrees in place.
     Adjust turn_time for your specific robot’s rotation speed.
