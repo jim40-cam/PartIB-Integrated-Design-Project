@@ -168,7 +168,7 @@ def put_down_box(
 
     # --- Setup motors and distance sensor ---
     i2c = I2C(i2c_id, scl=Pin(scl_pin), sda=Pin(sda_pin), freq=freq)
-    tof = VL53L0X(i2c)
+    #tof = VL53L0X(i2c)
     print("VL53L0X sensor ready.")
 
     motor3 = Motor(dirPin=4, PWMPin=5)
