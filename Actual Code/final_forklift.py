@@ -2,8 +2,25 @@
 from machine import Pin, PWM, I2C # type: ignore (will work on pico)
 from time import sleep
 from libs.VL53L0X.VL53L0X import VL53L0X #type: ignore
-from final_forward import Motor
+from final_forward import Motor, forward
 
+def turn_around(turn_time=1.8, speed=60):
+    """
+    Spin robot 180 degrees in place.
+    Adjust turn_time for your specific robot’s rotation speed.
+    """
+    print("Turning around 180°...")
+    motor3 = Motor(dirPin=4, PWMPin=5)
+    motor4 = Motor(dirPin=7, PWMPin=6)
+
+    # One motor forward, one motor reverse for spin
+    motor3.Forward(speed)
+    motor4.Reverse(speed)
+
+    sleep(turn_time)
+    motor3.off()
+    motor4.off()
+    print("Turn complete.")
 
 # --- LINEAR ACTUATOR CLASS ---
 class Actuator:
@@ -65,6 +82,8 @@ def pick_up_box(
     3. Move robot forward to slide under box.
     4. Lift forks.
     5. Confirm box presence using VL53L0X.
+    6. Turn around 180°.
+    7. Call forward() to move it forward to next junction
     """
     # --- Setup distance sensor ---
     i2c = I2C(i2c_id, scl=Pin(scl_pin), sda=Pin(sda_pin), freq=freq)
@@ -115,7 +134,14 @@ def pick_up_box(
 
     if distance_after <= box_present_threshold:
         print("Box successfully picked up!")
-        return True
     else:
         print("Box pickup failed.")
         return False
+    
+
+    # Turn around 180*
+    turn_around(turn_time=1.8, speed=60)  # adjust time for your bot’s rotation speed
+
+    # Call forward() to move it forward to next junction
+    forward() 
+    return True
