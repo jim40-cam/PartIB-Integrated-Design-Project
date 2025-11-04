@@ -66,6 +66,10 @@ def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_
     # Initialize distance sensor
     tof = VL53L0X(i2c)
     print("Distance sensor initialised.")
+    
+    # set up LED
+    scan_led = Pin(22, Pin.OUT)  # GP22 indicator LED
+    scan_led.value(0)            # start OFF
 
     # move it forward about 5cm from start junction, add code here
 
@@ -83,20 +87,26 @@ def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_
     if 0x0C not in devices:
         print("Tiny Code Reader not detected at address 0x0C.")
         return None
+    
 
     reader = TinyCodeReader(i2c)
     print("Tiny Code Reader ready — scanning for QR codes...")
 
+    scan_led.value(1)
+
     delay = poll_delay or TinyCodeReader.TINY_CODE_READER_DELAY
 
     # Poll until a QR code is found
-    while True:
-        code = reader.poll()
-        if code:
-            print(f"QR Code detected: {code}")
-            parsed = parse_qr(code)
-            print(f"QR list: {parsed}")
-            if parsed:
-                return tuple(parsed)  #Return a tuple instead: lists can't be used as a key in dictionaries
-            return parsed
-        sleep(delay)
+    try:
+        while True:
+            code = reader.poll()
+            if code:
+                print(f"QR Code detected: {code}")
+                parsed = parse_qr(code)
+                print(f"QR parsed: {parsed}")
+                if parsed:
+                    return tuple(parsed)
+            sleep(delay)
+    finally:
+        # turn off LED
+        scan_led.value(0)
