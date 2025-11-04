@@ -148,20 +148,22 @@ def pick_up_box(
 
 
 def put_down_box(
+    parsed,
     i2c_id=0,
     scl_pin=17,
     sda_pin=16,
     freq=400000,
     move_forward_time=1.0,   # how long to move forward to position box
-    lift_down_time=11.0,     # same duration used for lifting up
-    move_back_time=1.0,      # how long to reverse after placing box
+    lift_down_time=11.0,     # duration for full lowering
+    partial_down_time=2.0,   # duration for partial lowering
+    move_back_time=1.0       # how long to reverse after placing box
 ):
     """
-    1. Move forward to placement position.
-    2. Lower forks to place the box down.
-    3. Move back to clear the box.
+    Place a box based on whether it belongs to the Upper or Lower rack.
+
+    Args:
+        parsed: tuple like ('A', 'U', 3) from parse_qr()
     """
-    print("Starting box drop-off sequence...")
 
     # --- Setup motors and distance sensor ---
     i2c = I2C(i2c_id, scl=Pin(scl_pin), sda=Pin(sda_pin), freq=freq)
@@ -171,7 +173,7 @@ def put_down_box(
     motor3 = Motor(dirPin=4, PWMPin=5)
     motor4 = Motor(dirPin=7, PWMPin=6)
 
-    # --- Move forward slightly to align box placement ---
+    # --- Common: Move forward to placement area ---
     print("Moving forward to place box...")
     motor3.Forward(50)
     motor4.Forward(50)
@@ -179,15 +181,41 @@ def put_down_box(
     motor3.off()
     motor4.off()
 
-    # --- Lower forks to set box down ---
-    print("Lowering forks to release box...")
-    lift_down(duration_s=lift_down_time, speed=10)
+    # --- Upper bay sequence ---
+    if parsed[1] == 'U':
+        print("Upper bay detected — placing box at upper level...")
+        lift_down(duration_s=lift_down_time, speed=10)
 
-    # --- Move backward to clear the box ---
+    # --- Lower bay sequence ---
+    elif parsed[1] == 'L':
+        print("Lower bay detected — performing two-step lowering sequence...")
+        # Step 1: lower slightly
+        print("Lowering partially...")
+        lift_down(duration_s=partial_down_time, speed=10)
+
+        # Step 2: move back slightly to position
+        print("Reversing to position for full lowering...")
+        motor3.Reverse(50)
+        motor4.Reverse(50)
+        sleep(move_back_time)
+        motor3.off()
+        motor4.off()
+
+        # Step 3: lower fully
+        print("Lowering fully to release box...")
+        lift_down(duration_s=lift_down_time - partial_down_time, speed=10)
+
+    else:
+        print(f"Unknown level in parsed data: {parsed[1]}")
+        return False
+
+    # --- Common: Move backward to clear the box ---
     print("Reversing to clear box...")
     motor3.Reverse(50)
     motor4.Reverse(50)
     sleep(move_back_time)
     motor3.off()
     motor4.off()
+
+
 
