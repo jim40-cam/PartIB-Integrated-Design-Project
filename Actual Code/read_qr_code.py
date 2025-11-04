@@ -55,7 +55,7 @@ def parse_qr(code_str):
         return None
 
 
-def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_mm=180, distance_tolerance=10, poll_delay=None):
+def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_mm=200, distance_tolerance=10, poll_delay=None):
     """
      Wait until robot is ~target_distance_mm away, then read a QR code and 
     convert it into a numeric vector [rack_id, level_id, position].
