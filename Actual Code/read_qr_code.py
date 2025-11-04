@@ -8,6 +8,7 @@ from libs.VL53L0X.VL53L0X import VL53L0X #type: ignore
 def parse_qr(code_str):
     """
     Convert QR code string into list [rack, level, position].
+    Now tuple, list can't be dictionary key
         rack: 'A' or 'B'
         level: 'L' for Lower, 'U' for Upper
         position: int 1–6

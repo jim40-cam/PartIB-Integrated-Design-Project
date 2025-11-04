@@ -4,7 +4,7 @@ from time import sleep
 from libs.VL53L0X.VL53L0X import VL53L0X #type: ignore
 from final_forward import Motor, forward
 
-def turn_around(turn_time=1.8, speed=60):
+def turn_around(turn_time=1.8, speed3=60, speed4=60): # check speeds, slightly different for each motor
     """
     Spin robot 180 degrees in place.
     Adjust turn_time for your specific robot’s rotation speed.
@@ -14,8 +14,8 @@ def turn_around(turn_time=1.8, speed=60):
     motor4 = Motor(dirPin=7, PWMPin=6)
 
     # One motor forward, one motor reverse for spin
-    motor3.Forward(speed)
-    motor4.Reverse(speed)
+    motor3.Forward(speed3)
+    motor4.Reverse(speed4)
 
     sleep(turn_time)
     motor3.off()
@@ -64,7 +64,7 @@ def lift_down(duration_s=3.0, speed=10): # edit speeds when testing
     print("Lift down complete.")
 
 
-# --- FORKLIFT FUNCTION ---
+# FORKLIFT FUNCTION 
 def pick_up_box(
     i2c_id=0,
     scl_pin=17,
@@ -140,8 +140,54 @@ def pick_up_box(
     
 
     # Turn around 180*
-    turn_around(turn_time=1.8, speed=60)  # adjust time for your bot’s rotation speed
+    turn_around(turn_time=1.8, speed3=60, speed4=60)  # adjust time and speeds as needed
 
     # Call forward() to move it forward to next junction
     forward() 
     return True
+
+
+def put_down_box(
+    i2c_id=0,
+    scl_pin=17,
+    sda_pin=16,
+    freq=400000,
+    move_forward_time=1.0,   # how long to move forward to position box
+    lift_down_time=11.0,     # same duration used for lifting up
+    move_back_time=1.0,      # how long to reverse after placing box
+):
+    """
+    1. Move forward to placement position.
+    2. Lower forks to place the box down.
+    3. Move back to clear the box.
+    """
+    print("Starting box drop-off sequence...")
+
+    # --- Setup motors and distance sensor ---
+    i2c = I2C(i2c_id, scl=Pin(scl_pin), sda=Pin(sda_pin), freq=freq)
+    tof = VL53L0X(i2c)
+    print("VL53L0X sensor ready.")
+
+    motor3 = Motor(dirPin=4, PWMPin=5)
+    motor4 = Motor(dirPin=7, PWMPin=6)
+
+    # --- Move forward slightly to align box placement ---
+    print("Moving forward to place box...")
+    motor3.Forward(50)
+    motor4.Forward(50)
+    sleep(move_forward_time)
+    motor3.off()
+    motor4.off()
+
+    # --- Lower forks to set box down ---
+    print("Lowering forks to release box...")
+    lift_down(duration_s=lift_down_time, speed=10)
+
+    # --- Move backward to clear the box ---
+    print("Reversing to clear box...")
+    motor3.Reverse(50)
+    motor4.Reverse(50)
+    sleep(move_back_time)
+    motor3.off()
+    motor4.off()
+
