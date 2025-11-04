@@ -41,7 +41,7 @@ def parse_qr(code_str):
 
 def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_mm=200, distance_tolerance=10, poll_delay=None):
     """
-     Wait until robot is ~target_distance_mm away, then read a QR code and 
+    read a QR code and 
     convert it into a tuple
     
     Args:
@@ -69,35 +69,40 @@ def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_
     scan_led.value(0)            # start OFF
 
     # move it forward about 5cm from start junction, add code here ?? are we doing this
+    # commenetd out, can read from the junction itself. 
+    # need to make sure it is facing the right direction though.
 
-    motor3 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv2 #1, which is on GP/5
-    motor4 = Motor(dirPin=7, PWMPin=6)  # Motor 4 is controlled from Motor Driv2 #2, which is on GP6/7
+
+
+    # motor3 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv2 #1, which is on GP/5
+    # motor4 = Motor(dirPin=7, PWMPin=6)  # Motor 4 is controlled from Motor Driv2 #2, which is on GP6/7
     
-    motor3.Forward(60)
-    motor4.Forward(60)
-    sleep(0.8)
-    motor3.off()
-    motor4.off()
+    # motor3.Forward(60)
+    # motor4.Forward(60)
+    # sleep(0.8)
+    # motor3.off()
+    # motor4.off()
 
     # Wait until within target distance, may need to experiment to find what this is 
-    # do we still need this ?????
-    while True:
-        distance = tof.read() - 40 # adjust for sensor offset
-        print(f"Distance: {distance} mm")
-        if abs(distance - target_distance_mm) <= distance_tolerance:
-            print("Within target distance.")
-            break
-        sleep(0.05)  # small delay to avoid busy-waiting
+    # not necessary if reading from junction itself
+    # while True:
+    #     distance = tof.read() - 40 # adjust for sensor offset
+    #     print(f"Distance: {distance} mm")
+    #     if abs(distance - target_distance_mm) <= distance_tolerance:
+    #         print("Within target distance.")
+    #         break
+    #     sleep(0.05)  # small delay to avoid busy-waiting
 
-    devices = i2c.scan()
-    if 0x0C not in devices:
-        print("Tiny Code Reader not detected at address 0x0C.")
-        return None
+    # devices = i2c.scan()
+    # if 0x0C not in devices:
+    #     print("Tiny Code Reader not detected at address 0x0C.")
+    #     return None
     
 
     reader = TinyCodeReader(i2c)
     print("Tiny Code Reader ready — scanning for QR codes...")
 
+    # turn on LED
     scan_led.value(1)
 
     delay = poll_delay or TinyCodeReader.TINY_CODE_READER_DELAY
