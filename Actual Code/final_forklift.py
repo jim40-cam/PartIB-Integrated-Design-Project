@@ -24,8 +24,7 @@ class Actuator:
         self.pwm.duty_u16(0)
 
 
-# --- INITIALIZE ACTUATOR ---
-# Match your wiring from test_actuator1()
+# --- INITIALISE ACTUATOR ---
 actuator = Actuator(dirPin=0, PWMPin=1)  # adjust pins if needed
 
 
