@@ -111,7 +111,7 @@ def pick_up_box(
         sleep(0.05)
 
     # --- Lower forks ---
-    lift_down(duration_s=lift_down_time, speed=10)
+    lift_down(duration_s=lift_down_time, speed=20)
 
     # --- Move robot forward slightly ---
     print("Moving forward to engage box...")
