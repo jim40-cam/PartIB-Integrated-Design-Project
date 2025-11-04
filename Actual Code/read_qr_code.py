@@ -1,4 +1,4 @@
-
+from class_definitions import Motor
 from machine import Pin, I2C # type: ignore (will work on pico)
 from time import sleep
 # will this work on pico? possibly
@@ -72,6 +72,14 @@ def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_
     scan_led.value(0)            # start OFF
 
     # move it forward about 5cm from start junction, add code here
+
+    motor3 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv2 #1, which is on GP/5
+    motor4 = Motor(dirPin=7, PWMPin=6)  # Motor 4 is controlled from Motor Driv2 #2, which is on GP6/7
+    motor3.off()
+    motor4.off()
+    motor3.Forward(60)
+    motor4.Forward(60)
+    sleep(0.8)
 
     # Wait until within target distance, may need to experiment to find what this is 
     # do we still need this ?????
