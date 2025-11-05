@@ -1,9 +1,10 @@
 # forklift_control.py
+from class_definitions import Motor
 from machine import Pin, PWM, I2C #type: ignore (will work on pico)
 import time
 from libs.VL53L0X.VL53L0X import VL53L0X #type: ignore
 from time import sleep
-from .forward_movement import Motor
+from final_forward import Motor
 
 # LINEAR ACTUATOR SETUP
 ENA_PIN = 5
