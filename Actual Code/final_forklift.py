@@ -2,7 +2,7 @@
 from machine import Pin, PWM, I2C # type: ignore (will work on pico)
 from time import sleep
 from libs.VL53L0X.VL53L0X import VL53L0X #type: ignore
-from final_forward import Motor, forward
+from final_forward import Motor, forward_move
 # from final_right import ? ask haruto 
 
 def turn_around(turn_time=5, speed3=60, speed4=60): # check speeds, slightly different for each motor
@@ -91,7 +91,7 @@ def pick_up_box(
     #tof = VL53L0X(i2c)
     print("VL53L0X sensor ready.")
 
-    forward()
+    forward_move()
 
     # motor3 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv2 #1, which is on GP/5
     # motor4 = Motor(dirPin=7, PWMPin=6)  # Motor 4 is controlled from Motor Driv2 #2, which is on GP6/7
@@ -148,7 +148,7 @@ def pick_up_box(
     turn_around(turn_time=5, speed3=60, speed4=60)  # adjust time and speeds as needed
 
     # Call forward() to move it forward to next junction
-    forward() 
+    forward_move() 
     return True
 
 
