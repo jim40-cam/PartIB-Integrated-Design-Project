@@ -93,14 +93,14 @@ def pick_up_box(
 
     forward()
 
-    motor3 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv2 #1, which is on GP/5
-    motor4 = Motor(dirPin=7, PWMPin=6)  # Motor 4 is controlled from Motor Driv2 #2, which is on GP6/7
+    # motor3 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv2 #1, which is on GP/5
+    # motor4 = Motor(dirPin=7, PWMPin=6)  # Motor 4 is controlled from Motor Driv2 #2, which is on GP6/7
     
-    motor3.Forward(60)
-    motor4.Forward(60)
-    sleep(0.8)
-    motor3.off()
-    motor4.off()
+    # motor3.Forward(60)
+    # motor4.Forward(60)
+    # sleep(0.8)
+    # motor3.off()
+    # motor4.off()
 
 
 
@@ -144,7 +144,7 @@ def pick_up_box(
     #     return False
     
 
-    # Turn around 180*, turn right twice
+    # Turn around 180*, 
     turn_around(turn_time=5, speed3=60, speed4=60)  # adjust time and speeds as needed
 
     # Call forward() to move it forward to next junction
