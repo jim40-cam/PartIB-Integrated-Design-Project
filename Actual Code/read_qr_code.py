@@ -29,7 +29,9 @@ def parse_qr(code_str):
 
         if rack_str in ('A', 'B') and level_short in ('L', 'U') and 1 <= pos <= 6:
             parsed = (rack_str, level_short, pos)
+            print(parsed)
             return parsed
+            
         else:
             print(f"Invalid QR code format: {code_str}")
             return None
@@ -39,7 +41,7 @@ def parse_qr(code_str):
         return None
 
 
-def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_mm=200, distance_tolerance=10, poll_delay=None):
+def scan_qr_code(i2c_id=1, scl_pin=19, sda_pin=18, freq=400000, target_distance_mm=200, distance_tolerance=10, poll_delay=None):
     """
     read a QR code and 
     convert it into a tuple
@@ -121,3 +123,5 @@ def scan_qr_code(i2c_id=0, scl_pin=17, sda_pin=16, freq=400000, target_distance_
     finally:
         # turn off LED
         scan_led.value(0)
+
+parse_qr("Rack A, Lower, 6")
