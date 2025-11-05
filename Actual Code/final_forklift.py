@@ -91,6 +91,9 @@ def pick_up_box(
     #tof = VL53L0X(i2c)
     print("VL53L0X sensor ready.")
 
+    # --- Lower forks ---
+    lift_down(duration_s=lift_down_time, speed=25)
+
     forward_move()
 
     # motor3 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv2 #1, which is on GP/5
@@ -114,8 +117,7 @@ def pick_up_box(
     #         break
     #     sleep(0.05)
 
-    # --- Lower forks ---
-    lift_down(duration_s=lift_down_time, speed=25)
+    
 
     # --- Move robot forward slightly ---
     print("Moving forward to engage box...")
