@@ -8,5 +8,13 @@ from machine import Pin, PWM
 from utime import sleep
 from final_location_reader import location_movement
 
-location = "fflffrf"
+button_pin = 26
+button = Pin(button_pin, Pin.IN, Pin.PULL_DOWN)
+while True:
+    if button.value() == 0:
+        sleep(0.1)
+        pass
+    else:
+        break
+location = "fflff"
 location_movement(location)
