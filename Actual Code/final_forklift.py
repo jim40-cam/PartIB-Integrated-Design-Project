@@ -73,8 +73,8 @@ def pick_up_box(
     freq=400000,
     approach_distance=20,      # distance (mm) at which to start pickup
     box_present_threshold=40,  # consider "box detected" if <40 mm away
-    lift_down_time=19.0,
-    lift_up_time=19.0
+    lift_down_time=15.0,
+    lift_up_time=15.0
 ):
     """
     0. Move forward

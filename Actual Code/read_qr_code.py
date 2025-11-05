@@ -63,7 +63,7 @@ def scan_qr_code(i2c_id=1, scl_pin=19, sda_pin=18, freq=400000, target_distance_
     i2c = I2C(i2c_id, scl=Pin(scl_pin), sda=Pin(sda_pin), freq=freq)
 
     # Initialize distance sensor
-    tof = VL53L0X(i2c)
+    #tof = VL53L0X(i2c)
     print("Distance sensor initialised.")
     
     # set up LED
@@ -124,4 +124,3 @@ def scan_qr_code(i2c_id=1, scl_pin=19, sda_pin=18, freq=400000, target_distance_
         # turn off LED
         scan_led.value(0)
 
-parse_qr("Rack A, Lower, 6")
