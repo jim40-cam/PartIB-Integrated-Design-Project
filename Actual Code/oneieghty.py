@@ -17,9 +17,9 @@ def int180():
     motor3.off()
     motor4.off()
     
-    motor3.Forward(60)  # Motor 3 moves backward at 60% speed
-    motor4.Reverse(60)  # Motor 4 moves forward at 60% speed
-    sleep(3)
+    motor3.Forward(80)  # Motor 3 moves backward at 60% speed
+    motor4.Reverse(80)  # Motor 4 moves forward at 60% speed
+    sleep(1)
     input_pin = 9
     while True:
         if input9.value() == 0:
