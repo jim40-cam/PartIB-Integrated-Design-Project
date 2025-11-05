@@ -91,6 +91,8 @@ def pick_up_box(
     #tof = VL53L0X(i2c)
     print("VL53L0X sensor ready.")
 
+    forward()
+
     motor3 = Motor(dirPin=4, PWMPin=5)  # Motor 3 is controlled from Motor Driv2 #1, which is on GP/5
     motor4 = Motor(dirPin=7, PWMPin=6)  # Motor 4 is controlled from Motor Driv2 #2, which is on GP6/7
     
@@ -99,6 +101,7 @@ def pick_up_box(
     sleep(0.8)
     motor3.off()
     motor4.off()
+
 
 
     # --- Wait until close enough to box ---
@@ -156,7 +159,7 @@ def put_down_box(
     sda_pin=16,
     freq=400000,
     move_forward_time=1.0,   # how long to move forward to position box
-    lift_down_time=11.0,     # duration for full lowering
+    lift_down_time=19.0,     # duration for full lowering
     partial_down_time=2.0,   # duration for partial lowering
     move_back_time=1.0       # how long to reverse after placing box
     # Need to test to confirm all of these times
@@ -171,7 +174,7 @@ def put_down_box(
     # --- Setup motors and distance sensor ---
     i2c = I2C(i2c_id, scl=Pin(scl_pin), sda=Pin(sda_pin), freq=freq)
     #tof = VL53L0X(i2c)
-    print("VL53L0X sensor ready.")
+    #print("VL53L0X sensor ready.")
 
     motor3 = Motor(dirPin=4, PWMPin=5)
     motor4 = Motor(dirPin=7, PWMPin=6)
@@ -187,14 +190,14 @@ def put_down_box(
     # --- Upper bay sequence ---
     if parsed[1] == 'U':
         print("Upper bay detected — placing box at upper level...")
-        lift_down(duration_s=lift_down_time, speed=20)
+        lift_down(duration_s=lift_down_time, speed=25)
 
     # --- Lower bay sequence ---
     elif parsed[1] == 'L':
         print("Lower bay detected — performing two-step lowering sequence...")
         # Step 1: lower slightly
         print("Lowering partially...")
-        lift_down(duration_s=partial_down_time, speed=20)
+        lift_down(duration_s=partial_down_time, speed=25)
 
         # Step 2: move back slightly to position
         print("Reversing to position for full lowering...")
